@@ -1,8 +1,9 @@
+import bpy
 from bpy.types import AddonPreferences
 from bpy.props import StringProperty, BoolProperty
 
 
-class TemplatePreferences(AddonPreferences):  # {AddonNamePreferences}
+class TextEditorForDevelopmentPreferences(AddonPreferences):
     bl_idname = __package__
 
     setting_1: StringProperty(
@@ -18,3 +19,11 @@ class TemplatePreferences(AddonPreferences):  # {AddonNamePreferences}
 
         layout.prop(self, "setting_1")
         layout.prop(self, "setting_2")
+
+
+def register():
+    bpy.utils.register_class(TextEditorForDevelopmentPreferences)
+
+
+def unregister():
+    bpy.utils.unregister_class(TextEditorForDevelopmentPreferences)
