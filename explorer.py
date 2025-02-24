@@ -20,7 +20,7 @@ expanded_folder_paths = set()
 
 def find_file_path_index(file_path, default=0):
     folder_view_list = bpy.context.window_manager.explorer_properties.folder_view_list
-    return next((i for i, file in enumerate(folder_view_list) if file.file_path == file_path), default)
+    return next((i for i, file in enumerate(folder_view_list) if file.file_path == str(file_path)), default)
 
 
 def restore_active_file_decorator(func):
@@ -81,15 +81,22 @@ def open_folder(folder: Path, creation_idx=0, depth=0, file_clicked_on=0):
     return creation_idx  # Ensure index continuity
 
 
-def refresh_open_folder():
+def refresh_folder_view(new_item=None):
     context = bpy.context
     props = context.window_manager.explorer_properties
     open_folder(Path(props.open_folder_path))
+    if new_item is not None:
+        props.folder_view_active_index = find_file_path_index(new_item)
     context.area.tag_redraw()
 
 
 def contextual_parent_folder_path() -> str:
     props = bpy.context.window_manager.explorer_properties
+    folder_view_list = props.folder_view_list
+
+    if len(folder_view_list) < 1:
+        return props.open_folder_path
+
     active_idx = props.folder_view_active_index
     active_item = props.folder_view_list[active_idx]
 
@@ -174,7 +181,7 @@ class EXPLORER_UL_folder_view_list(UIList):
         icon = extension_to_icon.get(file_type, "FILE")
 
         if self.layout_type in {"DEFAULT", "COMPACT"}:
-            layout.emboss="NONE"
+            layout.emboss = "NONE"
 
             for i in range(depth):
                 spacer = layout.row()
@@ -218,8 +225,9 @@ class EXPLORER_PT_explorer_panel(Panel):
         row.operator("text.open_folder", text=folder_text)
         row.operator("text.create_new_file", text="", icon="FILE_NEW")
         row.operator("text.create_new_folder", text="", icon="NEWFOLDER")
-        row.operator("text.refresh_open_folder", text="", icon="FILE_REFRESH")
-        row.operator("text.collapse_folders", text="", icon="AREA_JOIN_LEFT" if bpy.app.version >= (4, 3, 0) else "AREA_JOIN")
+        row.operator("text.refresh_folder_view", text="", icon="FILE_REFRESH")
+        row.operator("text.collapse_folders", text="",
+                     icon="AREA_JOIN_LEFT" if bpy.app.version >= (4, 3, 0) else "AREA_JOIN")
         if panel:
             panel.template_list(
                 "EXPLORER_UL_folder_view_list",
@@ -274,14 +282,14 @@ def require_valid_open_folder(cls):
 
 
 @require_valid_open_folder
-class EXPLORER_OT_refresh_open_folder(Operator):
-    bl_idname = "text.refresh_open_folder"
+class EXPLORER_OT_refresh_folder_view(Operator):
+    bl_idname = "text.refresh_folder_view"
     bl_label = "Refresh Open Folder"
     bl_description = "Update the displayed contents of the folder view"
     bl_options = {"INTERNAL"}
 
     def execute(self, context):
-        refresh_open_folder()
+        refresh_folder_view()
         return {"FINISHED"}
 
 
@@ -322,7 +330,7 @@ class EXPLORER_OT_collapse_folders(Operator):
         global expanded_folder_paths
 
         expanded_folder_paths = set()
-        refresh_open_folder()
+        refresh_folder_view()
         return {"FINISHED"}
 
 
@@ -336,7 +344,7 @@ class EXPLORER_OT_create_new_folder(Operator):
     new_folder_name: StringProperty(
         name="Folder Name",
         description="The name of the folder to be created",
-        default="New Folder"
+        default="new_folder"
     )
 
     def invoke(self, context, event):
@@ -350,10 +358,12 @@ class EXPLORER_OT_create_new_folder(Operator):
         try:
             new_folder.mkdir()
         except FileExistsError:
-            self.report({"ERROR"}, f"Folder {self.new_folder_name} already exists in this location.")
+            message = f"Folder {self.new_folder_name} already exists in this location."
+            self.report({"ERROR"}, message)
+            refresh_folder_view()
             return {"CANCELLED"}
-        
-        refresh_open_folder()
+
+        refresh_folder_view(new_folder)
         return {"FINISHED"}
 
 
@@ -367,7 +377,7 @@ class EXPLORER_OT_create_new_file(Operator):
     new_file_name: StringProperty(
         name="File Name",
         description="The name of the file to be created",
-        default="myscript.py"
+        default="my_script.py"
     )
 
     def invoke(self, context, event):
@@ -381,10 +391,12 @@ class EXPLORER_OT_create_new_file(Operator):
         try:
             new_file.touch(exist_ok=False)
         except FileExistsError:
-            self.report({"ERROR"}, f"File {self.new_file_name} already exists in this location.")
+            message = f"File {self.new_file_name} already exists in this location."
+            self.report({"ERROR"}, message)
+            refresh_folder_view()
             return {"CANCELLED"}
 
-        refresh_open_folder()
+        refresh_folder_view(new_file)
         return {"FINISHED"}
 
 
@@ -400,8 +412,8 @@ class EXPLORER_OT_delete_file(Operator):
         wm = context.window_manager
         file = Path(self.file_path)
         file_name = file.name
-        title=f"Are you sure you want to delete {file_name}?"
-        message=f"You can restore this {'folder' if file.is_dir() else 'file'} from the Rycycle Bin."
+        title = f"Are you sure you want to delete {file_name}?"
+        message = f"You can restore this {'folder' if file.is_dir() else 'file'} from the Rycycle Bin."
         return wm.invoke_confirm(self, event, title=title, message=message, icon="INFO")
 
     def execute(self, context):
@@ -414,13 +426,18 @@ class EXPLORER_OT_delete_file(Operator):
             else:
                 file.unlink()
         except FileNotFoundError:
-            message = f"{'Folder ' if is_folder else 'File '}{self.file_path} doesn't exist."
+            message = " ".join(("Folder" if is_folder else "File", f"{self.file_path} doesn't exist."))
             self.report({"ERROR"}, message)
-            refresh_open_folder()
+            refresh_folder_view()
             return {"CANCELLED"}
-        
-        refresh_open_folder()
+
+        refresh_folder_view()
         return {"FINISHED"}
+
+
+# ——————————————————————————————————————————————————————————————————————
+# MARK: REGISTRATION
+# ——————————————————————————————————————————————————————————————————————
 
 
 classes = [
@@ -429,7 +446,7 @@ classes = [
     EXPLORER_UL_folder_view_list,
     EXPLORER_PT_explorer_panel,
     EXPLORER_OT_open_folder,
-    EXPLORER_OT_refresh_open_folder,
+    EXPLORER_OT_refresh_folder_view,
     EXPLORER_OT_toggle_expand_folder,
     EXPLORER_OT_collapse_folders,
     EXPLORER_OT_create_new_folder,
