@@ -18,7 +18,7 @@ expanded_folder_paths = set()
 # ——————————————————————————————————————————————————————————————————————
 
 
-def find_file_path_index(file_path, default=0):
+def find_file_path_index(file_path: Path | str, default=0):
     folder_view_list = bpy.context.window_manager.explorer_properties.folder_view_list
     return next((i for i, file in enumerate(folder_view_list) if file.file_path == str(file_path)), default)
 
@@ -30,15 +30,16 @@ def restore_active_file_decorator(func):
 
         folder_view_list = props.folder_view_list
         active_idx = props.folder_view_active_index
-        file_clicked_on = kwargs.get("file_clicked_on", 0)
+        file_clicked_on: int = kwargs.get("file_clicked_on", 0)
 
         if 0 <= active_idx < len(folder_view_list):
             active_file_path = folder_view_list[active_idx].file_path
         else:
             active_file_path = None
 
-        result = func(*args, **kwargs)
+        result = func(*args, **kwargs)  # Original function call
 
+        # Restore active file path if possible
         if active_file_path is None:
             new_idx = 0
         else:
@@ -50,8 +51,10 @@ def restore_active_file_decorator(func):
 
 
 @restore_active_file_decorator
-def open_folder(folder: Path, creation_idx=0, depth=0, file_clicked_on=0):
+def open_folder(folder_path: Path | str, creation_idx=0, depth=0, file_clicked_on=0):
     global expanded_folder_paths
+
+    # TODO: Remove file paths from expanded_folder_paths if they don't exist on disk
 
     context = bpy.context
     props = context.window_manager.explorer_properties
@@ -60,7 +63,7 @@ def open_folder(folder: Path, creation_idx=0, depth=0, file_clicked_on=0):
         props.folder_view_list.clear()
 
     files = sorted(
-        folder.iterdir(),
+        Path(folder_path).iterdir(),
         key=lambda f: (
             not f.is_dir(),  # Folders first
             f.name.lower()   # Then sort by name
@@ -69,42 +72,83 @@ def open_folder(folder: Path, creation_idx=0, depth=0, file_clicked_on=0):
 
     for file in files:
         item = props.folder_view_list.add()
-        item.creation_idx = creation_idx
-        item.depth = depth
-        item.name = file.name
         item.file_path = str(file)
+        item.file_name = file.name
         item.file_type = file.suffix.lower()
+        item.name = file.name
+        item.depth = depth
+        item.creation_idx = creation_idx
         creation_idx += 1
 
         if item.file_path in expanded_folder_paths and file.is_dir():
-            creation_idx = open_folder(file, creation_idx, depth+1)
+            creation_idx = open_folder(file, creation_idx=creation_idx, depth=depth+1)
     return creation_idx  # Ensure index continuity
 
 
-def refresh_folder_view(new_item=None):
+def refresh_folder_view(new_file_path: Path | str | None = None):
     context = bpy.context
     props = context.window_manager.explorer_properties
-    open_folder(Path(props.open_folder_path))
-    if new_item is not None:
-        props.folder_view_active_index = find_file_path_index(new_item)
+
+    open_folder(props.open_folder_path)
+
+    if new_file_path is not None:
+        props.folder_view_active_index = find_file_path_index(new_file_path)
+
     context.area.tag_redraw()
 
 
-def contextual_parent_folder_path() -> str:
+def contextual_parent_folder():
     props = bpy.context.window_manager.explorer_properties
     folder_view_list = props.folder_view_list
 
-    if len(folder_view_list) < 1:
-        return props.open_folder_path
+    if len(folder_view_list) < 1:  # Return open folder if there are no subfolders
+        return Path(props.open_folder_path)
 
     active_idx = props.folder_view_active_index
+    if not 0 <= active_idx < len(folder_view_list):
+        return
     active_item = props.folder_view_list[active_idx]
 
-    if active_item.file_type == "" and active_item.file_path in expanded_folder_paths:
-        parent_folder_path = active_item.file_path
+    if active_item.file_path in expanded_folder_paths:
+        parent_folder = Path(active_item.file_path)
     else:
-        parent_folder_path = str(Path(active_item.file_path).parent)
-    return parent_folder_path
+        parent_folder = Path(active_item.file_path).parent
+    return parent_folder
+
+
+def unique_path(destination: Path | str) -> Path:
+    parent = destination.parent
+    original_stem = destination.stem
+    suffix = destination.suffix
+    counter = 1
+    while destination.exists():
+        destination = parent / f"{original_stem} ({counter}){suffix}"
+        counter += 1
+    return Path(destination)
+
+
+def file_name_get(self):
+    return self["file_name"]
+
+
+def file_name_set(self, value):
+    source = Path(self.file_path)
+    parent = source.parent
+    destination: Path = parent / value
+
+    # Is true for when the file is first loaded
+    if str(destination) == self.file_path:
+        self["file_name"] = value
+        return
+
+    unique_destination = unique_path(destination)
+    source.rename(unique_destination)
+
+    self["file_name"] = unique_destination.name
+    self.file_path = str(unique_destination)
+    self.name = unique_destination.name
+
+    refresh_folder_view()
 
 
 # ——————————————————————————————————————————————————————————————————————
@@ -114,6 +158,10 @@ def contextual_parent_folder_path() -> str:
 
 class FileItemProperties(bpy.types.PropertyGroup):
     file_path: StringProperty(name="File Path")
+    file_name: StringProperty(
+        get=file_name_get,
+        set=file_name_set,
+        name="File Name")
     file_type: StringProperty(name="File Type")
     creation_idx: IntProperty()
     depth: IntProperty()
@@ -121,7 +169,7 @@ class FileItemProperties(bpy.types.PropertyGroup):
 
 class ExplorerProperties(bpy.types.PropertyGroup):
     def get_folder_path(self):
-        return self.get("open_folder_path", "")
+        return self["open_folder_path"]
 
     def set_folder_path(self, value):
         open_folder(Path(value))
@@ -133,7 +181,7 @@ class ExplorerProperties(bpy.types.PropertyGroup):
         set=set_folder_path
     )
     folder_view_list: CollectionProperty(type=FileItemProperties)
-    folder_view_active_index: IntProperty(name="Active File Index", default=0)
+    folder_view_active_index: IntProperty(name="Active File Index")
 
 
 # ——————————————————————————————————————————————————————————————————————
@@ -177,7 +225,8 @@ class EXPLORER_UL_folder_view_list(UIList):
         file_path = item.file_path
         file_type = item.file_type
         depth = item.depth
-        is_directory = Path(item.file_path).is_dir()
+        is_active = item.creation_idx == active_data.folder_view_active_index
+        is_folder = Path(item.file_path).is_dir()
         icon = extension_to_icon.get(file_type, "FILE")
 
         if self.layout_type in {"DEFAULT", "COMPACT"}:
@@ -187,17 +236,17 @@ class EXPLORER_UL_folder_view_list(UIList):
                 spacer = layout.row()
                 spacer.ui_units_x = 1
 
-            if is_directory:
+            if is_folder:
                 icon = "DOWNARROW_HLT" if file_path in expanded_folder_paths else "RIGHTARROW"
-                op = layout.operator("text.toggle_expand_folder", text="", icon=icon, emboss=False)
+                op = layout.operator("text.toggle_expand_folder", text="", icon=icon)
                 op.folder_path = file_path
-                layout.label(text=item.name)
-                if item.creation_idx == active_data.folder_view_active_index:
+                layout.prop(item, "file_name", text="")
+                if is_active:
                     op = layout.operator("text.delete_file", text="", icon="TRASH")
                     op.file_path = file_path
             else:
-                layout.label(text=item.name, icon=icon)
-                if item.creation_idx == active_data.folder_view_active_index:
+                layout.prop(item, "file_name", text="", icon=icon)
+                if is_active:
                     op = layout.operator("text.delete_file", text="", icon="TRASH")
                     op.file_path = file_path
 
@@ -223,8 +272,10 @@ class EXPLORER_PT_explorer_panel(Panel):
         row = header.row(align=True)
         folder_text = folder_name if folder_name != "" else "Open Folder"
         row.operator("text.open_folder", text=folder_text)
+        row.operator_context = "EXEC_DEFAULT"
         row.operator("text.create_new_file", text="", icon="FILE_NEW")
         row.operator("text.create_new_folder", text="", icon="NEWFOLDER")
+        row.operator_context = "INVOKE_DEFAULT"
         row.operator("text.refresh_folder_view", text="", icon="FILE_REFRESH")
         row.operator("text.collapse_folders", text="",
                      icon="AREA_JOIN_LEFT" if bpy.app.version >= (4, 3, 0) else "AREA_JOIN")
@@ -240,6 +291,40 @@ class EXPLORER_PT_explorer_panel(Panel):
 # ——————————————————————————————————————————————————————————————————————
 # MARK: OPERATORS
 # ——————————————————————————————————————————————————————————————————————
+
+
+def disable_on_empty_folder_path(cls):
+    original_poll = getattr(cls, "poll", None)
+
+    @classmethod
+    def poll(cls, context):
+        props = context.window_manager.explorer_properties
+        if original_poll:
+            return original_poll(context) and props.open_folder_path != ""
+        return props.open_folder_path != ""
+
+    cls.poll = poll
+    return cls
+
+
+def require_valid_open_folder(cls):
+    original_invoke = getattr(cls, "invoke", None)
+
+    def invoke(self, context, event):
+        props = context.window_manager.explorer_properties
+        if not Path(props.open_folder_path).is_dir():
+            self.report({"ERROR"}, "The currently opened folder does not exist.")
+            props.open_folder_path = ""
+            refresh_folder_view()
+            return {"CANCELLED"}
+
+        if original_invoke:
+            return original_invoke(self, context, event)
+
+        return self.execute(context)
+
+    cls.invoke = invoke
+    return cls
 
 
 class EXPLORER_OT_open_folder(Operator):
@@ -271,16 +356,7 @@ class EXPLORER_OT_open_folder(Operator):
         return {"FINISHED"}
 
 
-def require_valid_open_folder(cls):
-    @classmethod
-    def poll(cls, context):
-        props = context.window_manager.explorer_properties
-        return props.open_folder_path != "" and Path(props.open_folder_path).is_dir()
-
-    cls.poll = poll
-    return cls
-
-
+@disable_on_empty_folder_path
 @require_valid_open_folder
 class EXPLORER_OT_refresh_folder_view(Operator):
     bl_idname = "text.refresh_folder_view"
@@ -293,6 +369,8 @@ class EXPLORER_OT_refresh_folder_view(Operator):
         return {"FINISHED"}
 
 
+@disable_on_empty_folder_path
+@require_valid_open_folder
 class EXPLORER_OT_toggle_expand_folder(Operator):
     bl_idname = "text.toggle_expand_folder"
     bl_label = "Expand Folder"
@@ -303,6 +381,7 @@ class EXPLORER_OT_toggle_expand_folder(Operator):
 
     def execute(self, context):
         global expanded_folder_paths
+
         props = context.window_manager.explorer_properties
         file_clicked_on = find_file_path_index(self.folder_path, 0)
 
@@ -315,6 +394,8 @@ class EXPLORER_OT_toggle_expand_folder(Operator):
         return {"FINISHED"}
 
 
+@disable_on_empty_folder_path
+@require_valid_open_folder
 class EXPLORER_OT_collapse_folders(Operator):
     bl_idname = "text.collapse_folders"
     bl_label = "Collapse Folders in Explorer"
@@ -334,6 +415,7 @@ class EXPLORER_OT_collapse_folders(Operator):
         return {"FINISHED"}
 
 
+@disable_on_empty_folder_path
 @require_valid_open_folder
 class EXPLORER_OT_create_new_folder(Operator):
     bl_idname = "text.create_new_folder"
@@ -352,21 +434,18 @@ class EXPLORER_OT_create_new_folder(Operator):
         return wm.invoke_props_dialog(self)
 
     def execute(self, context):
-        parent_folder_path = contextual_parent_folder_path()
-        new_folder: Path = Path(parent_folder_path) / self.new_folder_name
+        parent_folder = contextual_parent_folder()
 
-        try:
-            new_folder.mkdir()
-        except FileExistsError:
-            message = f"Folder {self.new_folder_name} already exists in this location."
-            self.report({"ERROR"}, message)
-            refresh_folder_view()
-            return {"CANCELLED"}
+        new_folder: Path = parent_folder / self.new_folder_name
+        unique_new_folder = unique_path(new_folder)
 
-        refresh_folder_view(new_folder)
+        unique_new_folder.mkdir()
+
+        refresh_folder_view(new_file_path=new_folder)
         return {"FINISHED"}
 
 
+@disable_on_empty_folder_path
 @require_valid_open_folder
 class EXPLORER_OT_create_new_file(Operator):
     bl_idname = "text.create_new_file"
@@ -385,21 +464,19 @@ class EXPLORER_OT_create_new_file(Operator):
         return wm.invoke_props_dialog(self)
 
     def execute(self, context):
-        parent_folder_path = contextual_parent_folder_path()
-        new_file: Path = Path(parent_folder_path) / self.new_file_name
+        parent_folder_path = contextual_parent_folder()
 
-        try:
-            new_file.touch(exist_ok=False)
-        except FileExistsError:
-            message = f"File {self.new_file_name} already exists in this location."
-            self.report({"ERROR"}, message)
-            refresh_folder_view()
-            return {"CANCELLED"}
+        new_file: Path = parent_folder_path / self.new_file_name
 
-        refresh_folder_view(new_file)
+        unique_new_file = unique_path(new_file)
+        unique_new_file.touch(exist_ok=False)
+
+        refresh_folder_view(new_file_path=new_file)
         return {"FINISHED"}
 
 
+@disable_on_empty_folder_path
+@require_valid_open_folder
 class EXPLORER_OT_delete_file(Operator):
     bl_idname = "text.delete_file"
     bl_label = "Delete File"
@@ -409,11 +486,13 @@ class EXPLORER_OT_delete_file(Operator):
     file_path: StringProperty()
 
     def invoke(self, context, event):
+        if event.shift:
+            return self.execute(context)
         wm = context.window_manager
         file = Path(self.file_path)
         file_name = file.name
         title = f"Are you sure you want to delete {file_name}?"
-        message = f"You can restore this {'folder' if file.is_dir() else 'file'} from the Rycycle Bin."
+        message = f"You can restore this {'folder' if file.is_dir() else 'file'} from the Recycle Bin."
         return wm.invoke_confirm(self, event, title=title, message=message, icon="INFO")
 
     def execute(self, context):
@@ -426,12 +505,20 @@ class EXPLORER_OT_delete_file(Operator):
             else:
                 file.unlink()
         except FileNotFoundError:
-            message = " ".join(("Folder" if is_folder else "File", f"{self.file_path} doesn't exist."))
+            message = f"File {self.file_path} doesn't exist."
             self.report({"ERROR"}, message)
             refresh_folder_view()
             return {"CANCELLED"}
 
+        props = context.window_manager.explorer_properties
+        folder_view_list = props.folder_view_list
+        active_idx = props.folder_view_active_index
+
         refresh_folder_view()
+
+        # Calculate new active index
+        new_active_idx = min(active_idx, len(folder_view_list) - 1)
+        props.folder_view_active_index = new_active_idx
         return {"FINISHED"}
 
 

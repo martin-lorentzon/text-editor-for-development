@@ -1,6 +1,6 @@
 bl_info = {
-    "name": "Text-Editor for Development",
-    "description": "Contains Text Editor modules mimicking features of editors like VSCode, providing more tools for add-on development.",
+    "name": "Text Editor for Development",
+    "description": "Reimagining the Text Editor for new add-on developers.",
     "author": "Martin Lorentzon",
     "version": (1, 0, 0),
     "blender": (4, 2, 0),
