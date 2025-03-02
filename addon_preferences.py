@@ -6,11 +6,11 @@ from bpy.props import StringProperty, BoolProperty
 class TextEditorForDevelopmentPreferences(AddonPreferences):
     bl_idname = __package__
 
-    default_file_name: StringProperty(  # TODO: Connect these to the create file/folder operators
+    default_new_file_name: StringProperty(
         name="Default File Name",
         default="my_script.py"
     )
-    default_folder_name: StringProperty(
+    default_new_folder_name: StringProperty(
         name="Default Folder Name",
         default="new_folder.py"
     )
@@ -22,8 +22,8 @@ class TextEditorForDevelopmentPreferences(AddonPreferences):
         header, panel = layout.panel("explorer_prefs", default_closed=False)
         header.label(text="Explorer")
         if panel:
-            panel.prop(self, "default_file_name")
-            panel.prop(self, "default_folder_name")
+            panel.prop(self, "default_new_file_name")
+            panel.prop(self, "default_new_folder_name")
 
 
 def register():

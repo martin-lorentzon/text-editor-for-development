@@ -127,11 +127,12 @@ def unique_path(destination: Path | str) -> Path:
     return Path(destination)
 
 
-def file_name_get(self):
+# File name (GETTER/SETTER)
+def get_file_name(self):
     return self["file_name"]
 
 
-def file_name_set(self, value):
+def set_file_name(self, value):
     source = Path(self.file_path)
     parent = source.parent
     destination: Path = parent / value
@@ -151,6 +152,36 @@ def file_name_set(self, value):
     refresh_folder_view()
 
 
+# Active index (GETTER/SETTER)
+def get_folder_view_active_index(self):
+    return self.get("folder_view_active_index", 0)
+
+
+def set_folder_view_active_index(self, value):
+    def show_text(text):
+        for area in bpy.context.screen.areas:
+            area: bpy.types.AreaSpaces
+            if area.type == "TEXT_EDITOR":
+                area.spaces[0].text = text
+
+    file = Path(self.folder_view_list[value].file_path)
+    texts = bpy.data.texts
+
+    if file.name in texts:
+        text = texts[file.name]
+        show_text(text)
+    else:
+        try:
+            with open(file, "r") as f:
+                pass
+            text = bpy.data.texts.load(str(file))
+            show_text(text)
+        except:
+            pass
+
+    self["folder_view_active_index"] = value
+
+
 # ——————————————————————————————————————————————————————————————————————
 # MARK: PROPERTY DEFINITIONS
 # ——————————————————————————————————————————————————————————————————————
@@ -159,29 +190,34 @@ def file_name_set(self, value):
 class FileItemProperties(bpy.types.PropertyGroup):
     file_path: StringProperty(name="File Path")
     file_name: StringProperty(
-        get=file_name_get,
-        set=file_name_set,
-        name="File Name")
+        name="File Name",
+        get=get_file_name,
+        set=set_file_name
+    )
     file_type: StringProperty(name="File Type")
     creation_idx: IntProperty()
     depth: IntProperty()
 
 
 class ExplorerProperties(bpy.types.PropertyGroup):
-    def get_folder_path(self):
-        return self["open_folder_path"]
+    def get_open_folder_path(self):
+        return self.get("open_folder_path", "")
 
-    def set_folder_path(self, value):
+    def set_open_folder_path(self, value):
         open_folder(Path(value))
         self["open_folder_path"] = value
 
     open_folder_path: StringProperty(
         name="Open Folder Path",
-        get=get_folder_path,
-        set=set_folder_path
+        get=get_open_folder_path,
+        set=set_open_folder_path
     )
     folder_view_list: CollectionProperty(type=FileItemProperties)
-    folder_view_active_index: IntProperty(name="Active File Index")
+    folder_view_active_index: IntProperty(
+        name="Active File Index",
+        get=get_folder_view_active_index,
+        set=set_folder_view_active_index
+    )
 
 
 # ——————————————————————————————————————————————————————————————————————
@@ -223,6 +259,7 @@ class EXPLORER_UL_folder_view_list(UIList):
         }
 
         file_path = item.file_path
+        file_name = item.file_name
         file_type = item.file_type
         depth = item.depth
         is_active = item.creation_idx == active_data.folder_view_active_index
@@ -245,7 +282,11 @@ class EXPLORER_UL_folder_view_list(UIList):
                     op = layout.operator("text.delete_file", text="", icon="TRASH")
                     op.file_path = file_path
             else:
-                layout.prop(item, "file_name", text="", icon=icon)
+                row = layout.row()
+                row.label(text="", icon=icon)
+                sub = row.row()
+                sub.alert = file_name in bpy.data.texts and bpy.data.texts[file_name].is_dirty
+                sub.prop(item, "file_name", text="")
                 if is_active:
                     op = layout.operator("text.delete_file", text="", icon="TRASH")
                     op.file_path = file_path
@@ -426,7 +467,7 @@ class EXPLORER_OT_create_new_folder(Operator):
     new_folder_name: StringProperty(
         name="Folder Name",
         description="The name of the folder to be created",
-        default="new_folder"
+        default=""
     )
 
     def invoke(self, context, event):
@@ -434,6 +475,11 @@ class EXPLORER_OT_create_new_folder(Operator):
         return wm.invoke_props_dialog(self)
 
     def execute(self, context):
+        addon_prefs = context.preferences.addons[__package__].preferences
+
+        if self.new_folder_name == "":
+            self.new_folder_name = addon_prefs["default_new_folder_name"]
+
         parent_folder = contextual_parent_folder()
 
         new_folder: Path = parent_folder / self.new_folder_name
@@ -456,7 +502,7 @@ class EXPLORER_OT_create_new_file(Operator):
     new_file_name: StringProperty(
         name="File Name",
         description="The name of the file to be created",
-        default="my_script.py"
+        default=""
     )
 
     def invoke(self, context, event):
@@ -464,9 +510,14 @@ class EXPLORER_OT_create_new_file(Operator):
         return wm.invoke_props_dialog(self)
 
     def execute(self, context):
-        parent_folder_path = contextual_parent_folder()
+        addon_prefs = context.preferences.addons[__package__].preferences
 
-        new_file: Path = parent_folder_path / self.new_file_name
+        if self.new_file_name == "":
+            self.new_file_name = addon_prefs["default_new_file_name"]
+
+        parent_folder = contextual_parent_folder()
+
+        new_file: Path = parent_folder / self.new_file_name
 
         unique_new_file = unique_path(new_file)
         unique_new_file.touch(exist_ok=False)
