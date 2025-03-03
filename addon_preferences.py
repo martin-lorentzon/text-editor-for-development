@@ -14,6 +14,10 @@ class TextEditorForDevelopmentPreferences(AddonPreferences):
         name="Default Folder Name",
         default="new_folder.py"
     )
+    unlink_on_file_deletion: BoolProperty(
+        name="Unlink on File Deletion",
+        default=True
+    )
 
     def draw(self, context):
         layout = self.layout
@@ -24,6 +28,7 @@ class TextEditorForDevelopmentPreferences(AddonPreferences):
         if panel:
             panel.prop(self, "default_new_file_name")
             panel.prop(self, "default_new_folder_name")
+            panel.prop(self, "unlink_on_file_deletion")
 
 
 def register():

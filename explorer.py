@@ -157,15 +157,22 @@ def get_folder_view_active_index(self):
     return self.get("folder_view_active_index", 0)
 
 
-def set_folder_view_active_index(self, value):
+def set_folder_view_active_index(self, value): 
+    self["folder_view_active_index"] = value
+
+    folder_view_list = self.folder_view_list
+
+    if len(folder_view_list) < 1:
+        return
+
     def show_text(text):
         for area in bpy.context.screen.areas:
             area: bpy.types.AreaSpaces
             if area.type == "TEXT_EDITOR":
                 area.spaces[0].text = text
 
-    file = Path(self.folder_view_list[value].file_path)
     texts = bpy.data.texts
+    file = Path(self.folder_view_list[value].file_path)
 
     if file.name in texts:
         text = texts[file.name]
@@ -174,12 +181,10 @@ def set_folder_view_active_index(self, value):
         try:
             with open(file, "r") as f:
                 pass
-            text = bpy.data.texts.load(str(file))
+            text = texts.load(str(file))
             show_text(text)
         except:
             pass
-
-    self["folder_view_active_index"] = value
 
 
 # ——————————————————————————————————————————————————————————————————————
@@ -283,10 +288,13 @@ class EXPLORER_UL_folder_view_list(UIList):
                     op.file_path = file_path
             else:
                 row = layout.row()
-                row.label(text="", icon=icon)
-                sub = row.row()
-                sub.alert = file_name in bpy.data.texts and bpy.data.texts[file_name].is_dirty
-                sub.prop(item, "file_name", text="")
+                row.prop(item, "file_name", text="", icon=icon)
+                text_datablock = bpy.data.texts.get(file_name, None)
+                if text_datablock is not None and text_datablock.is_dirty:
+                    sub = row.row()
+                    sub.alert = True
+                    sub.alignment = "RIGHT"
+                    sub.label(text="Unsaved")
                 if is_active:
                     op = layout.operator("text.delete_file", text="", icon="TRASH")
                     op.file_path = file_path
@@ -340,6 +348,7 @@ def disable_on_empty_folder_path(cls):
     @classmethod
     def poll(cls, context):
         props = context.window_manager.explorer_properties
+
         if original_poll:
             return original_poll(context) and props.open_folder_path != ""
         return props.open_folder_path != ""
@@ -353,6 +362,7 @@ def require_valid_open_folder(cls):
 
     def invoke(self, context, event):
         props = context.window_manager.explorer_properties
+
         if not Path(props.open_folder_path).is_dir():
             self.report({"ERROR"}, "The currently opened folder does not exist.")
             props.open_folder_path = ""
@@ -390,6 +400,7 @@ class EXPLORER_OT_open_folder(Operator):
 
     def execute(self, context):
         global expanded_folder_paths
+
         props = context.window_manager.explorer_properties
 
         expanded_folder_paths.clear()
@@ -478,7 +489,10 @@ class EXPLORER_OT_create_new_folder(Operator):
         addon_prefs = context.preferences.addons[__package__].preferences
 
         if self.new_folder_name == "":
-            self.new_folder_name = addon_prefs["default_new_folder_name"]
+            self.new_file_name = addon_prefs.get(
+                "default_new_folder_name", 
+                addon_prefs.bl_rna.properties["default_new_folder_name"].default
+            )
 
         parent_folder = contextual_parent_folder()
 
@@ -513,7 +527,10 @@ class EXPLORER_OT_create_new_file(Operator):
         addon_prefs = context.preferences.addons[__package__].preferences
 
         if self.new_file_name == "":
-            self.new_file_name = addon_prefs["default_new_file_name"]
+            self.new_file_name = addon_prefs.get(
+                "default_new_file_name", 
+                addon_prefs.bl_rna.properties["default_new_file_name"].default
+            )
 
         parent_folder = contextual_parent_folder()
 
@@ -540,6 +557,7 @@ class EXPLORER_OT_delete_file(Operator):
         if event.shift:
             return self.execute(context)
         wm = context.window_manager
+
         file = Path(self.file_path)
         file_name = file.name
         title = f"Are you sure you want to delete {file_name}?"
@@ -547,6 +565,8 @@ class EXPLORER_OT_delete_file(Operator):
         return wm.invoke_confirm(self, event, title=title, message=message, icon="INFO")
 
     def execute(self, context):
+        addon_prefs = context.preferences.addons[__package__].preferences
+
         file = Path(self.file_path)
         is_folder = file.is_dir()
 
@@ -555,6 +575,9 @@ class EXPLORER_OT_delete_file(Operator):
                 rmtree(file)
             else:
                 file.unlink()
+                if addon_prefs.unlink_on_file_deletion:
+                    texts = bpy.data.texts
+                    texts.remove(texts[file.name])
         except FileNotFoundError:
             message = f"File {self.file_path} doesn't exist."
             self.report({"ERROR"}, message)
