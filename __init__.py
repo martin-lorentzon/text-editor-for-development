@@ -22,11 +22,10 @@ bl_info = {
 if "bpy" in locals():
     from importlib import reload
 
-    reload(addon_preferences)
-    reload(explorer)
+    reload(register_explorer)
+    reload(unregister_explorer)
 else:
-    from . import addon_preferences
-    from . import explorer
+    from .explorer import register as register_explorer, unregister as unregister_explorer
 
 import bpy
 # fmt: on
@@ -37,20 +36,12 @@ import bpy
 # ——————————————————————————————————————————————————————————————————————
 
 
-modules = [
-    addon_preferences,
-    explorer
-]
-
-
 def register():
-    for module in modules:
-        module.register()
+    register_explorer()
 
 
 def unregister():
-    for module in reversed(modules):
-        module.unregister()
+    unregister_explorer()
 
 
 if __name__ == "__main__":
