@@ -4,9 +4,6 @@ from pathlib import Path
 from .functions import unique_path, refresh_folder_view, open_folder
 
 
-expanded_folder_paths = set()
-
-
 # ——————————————————————————————————————————————————————————————————————
 # MARK: GETTERS/SETTERS
 # ——————————————————————————————————————————————————————————————————————

@@ -1,5 +1,5 @@
 from bpy.types import Operator
-from ..properties import expanded_folder_paths
+from .. import expanded_folder_paths
 from ..helpers import disable_on_empty_folder_path, require_valid_open_folder
 from ..functions import refresh_folder_view
 

@@ -1,5 +1,5 @@
 import bpy
-from .properties import expanded_folder_paths
+from . import expanded_folder_paths
 from pathlib import Path
 
 

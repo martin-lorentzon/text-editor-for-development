@@ -1,6 +1,6 @@
 from bpy.types import Operator
 from bpy.props import StringProperty, BoolProperty
-from ..properties import expanded_folder_paths
+from .. import expanded_folder_paths
 
 
 class EXPLORER_OT_open_folder(Operator):

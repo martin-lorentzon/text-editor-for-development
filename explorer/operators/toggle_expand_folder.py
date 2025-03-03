@@ -2,7 +2,7 @@ from bpy.types import Operator
 from bpy.props import StringProperty
 from ..helpers import disable_on_empty_folder_path, require_valid_open_folder
 from ..functions import find_file_path_index, open_folder
-from ..properties import expanded_folder_paths
+from .. import expanded_folder_paths
 from pathlib import Path
 
 

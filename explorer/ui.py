@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import UILayout, UIList, Panel
-from .properties import expanded_folder_paths
+from . import expanded_folder_paths
 from pathlib import Path
 
 
