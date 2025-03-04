@@ -1,7 +1,9 @@
 from bpy.types import Operator
 from bpy.props import StringProperty
 from ..helpers import disable_on_empty_folder_path, require_valid_open_folder
+from ...helpers import uninitialized_preference
 from ..functions import refresh_folder_view, contextual_parent_folder, unique_path
+from ... import __package__ as base_package
 from pathlib import Path
 
 
@@ -24,13 +26,10 @@ class EXPLORER_OT_create_new_folder(Operator):
         return wm.invoke_props_dialog(self)
 
     def execute(self, context):
-        addon_prefs = context.preferences.addons[__package__].preferences
+        addon_prefs = context.preferences.addons[base_package].preferences
 
         if self.new_folder_name == "":
-            self.new_file_name = addon_prefs.get(
-                "default_new_folder_name", 
-                addon_prefs.bl_rna.properties["default_new_folder_name"].default
-            )
+            self.new_folder_name = uninitialized_preference(addon_prefs, "default_new_folder_name")
 
         parent_folder = contextual_parent_folder()
 

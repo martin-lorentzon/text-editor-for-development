@@ -1,6 +1,5 @@
 import bpy
 from bpy.types import UILayout, UIList, Panel
-from . import expanded_folder_paths
 from pathlib import Path
 
 
@@ -37,6 +36,7 @@ class EXPLORER_UL_folder_view_list(UIList):
             "": "FILE"
         }
 
+        expanded_folder_paths = context.window_manager.expanded_folder_paths
         file_path = item.file_path
         file_name = item.file_name
         file_type = item.file_type

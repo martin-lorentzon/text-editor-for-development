@@ -1,5 +1,4 @@
 from bpy.types import Operator
-from .. import expanded_folder_paths
 from ..helpers import disable_on_empty_folder_path, require_valid_open_folder
 from ..functions import refresh_folder_view
 
@@ -18,8 +17,7 @@ class EXPLORER_OT_collapse_folders(Operator):
         return len(props.folder_view_list) > 0
 
     def execute(self, context):
-        global expanded_folder_paths
-
-        expanded_folder_paths = set()
+        wm = context.window_manager
+        wm.expanded_folder_paths.clear()
         refresh_folder_view()
         return {"FINISHED"}

@@ -2,7 +2,9 @@ import bpy
 from bpy.types import Operator
 from bpy.props import StringProperty
 from ..helpers import disable_on_empty_folder_path, require_valid_open_folder
+from ...helpers import uninitialized_preference
 from ..functions import refresh_folder_view
+from ... import __package__ as base_package
 from pathlib import Path
 from shutil import rmtree
 
@@ -29,7 +31,10 @@ class EXPLORER_OT_delete_file(Operator):
         return wm.invoke_confirm(self, event, title=title, message=message, icon="INFO")
 
     def execute(self, context):
-        addon_prefs = context.preferences.addons[__package__].preferences
+        addon_prefs = context.preferences.addons[base_package].preferences
+        wm = context.window_manager
+
+        wm.expanded_folder_paths.discard(self.file_path)
 
         file = Path(self.file_path)
         is_folder = file.is_dir()
@@ -39,7 +44,7 @@ class EXPLORER_OT_delete_file(Operator):
                 rmtree(file)
             else:
                 file.unlink()
-                if addon_prefs.unlink_on_file_deletion:
+                if uninitialized_preference(addon_prefs, "unlink_on_file_deletion"):
                     texts = bpy.data.texts
                     texts.remove(texts[file.name])
         except FileNotFoundError:

@@ -1,6 +1,5 @@
 from bpy.types import Operator
 from bpy.props import StringProperty, BoolProperty
-from .. import expanded_folder_paths
 
 
 class EXPLORER_OT_open_folder(Operator):
@@ -24,10 +23,9 @@ class EXPLORER_OT_open_folder(Operator):
         return {'RUNNING_MODAL'}
 
     def execute(self, context):
-        global expanded_folder_paths
+        wm = context.window_manager
+        props = wm.explorer_properties
 
-        props = context.window_manager.explorer_properties
-
-        expanded_folder_paths.clear()
+        wm.expanded_folder_paths.clear()
         props.open_folder_path = self.directory
         return {"FINISHED"}

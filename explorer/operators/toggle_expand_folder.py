@@ -2,7 +2,6 @@ from bpy.types import Operator
 from bpy.props import StringProperty
 from ..helpers import disable_on_empty_folder_path, require_valid_open_folder
 from ..functions import find_file_path_index, open_folder
-from .. import expanded_folder_paths
 from pathlib import Path
 
 
@@ -17,15 +16,15 @@ class EXPLORER_OT_toggle_expand_folder(Operator):
     folder_path: StringProperty()
 
     def execute(self, context):
-        global expanded_folder_paths
-
-        props = context.window_manager.explorer_properties
+        wm = context.window_manager
+        props = wm.explorer_properties
+        
         file_clicked_on = find_file_path_index(self.folder_path, 0)
 
-        if self.folder_path in expanded_folder_paths:
-            expanded_folder_paths.discard(self.folder_path)
+        if self.folder_path in wm.expanded_folder_paths:
+            wm.expanded_folder_paths.discard(self.folder_path)
         else:
-            expanded_folder_paths.add(self.folder_path)
+            wm.expanded_folder_paths.add(self.folder_path)
 
         open_folder(Path(props.open_folder_path), file_clicked_on=file_clicked_on)
         return {"FINISHED"}

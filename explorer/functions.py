@@ -1,5 +1,4 @@
 import bpy
-from . import expanded_folder_paths
 from pathlib import Path
 
 
@@ -37,12 +36,15 @@ def restore_active_file_decorator(func):
 
 @restore_active_file_decorator
 def open_folder(folder_path: Path | str, creation_idx=0, depth=0, file_clicked_on=0):
-    global expanded_folder_paths
-
-    # TODO: Remove file paths from expanded_folder_paths if they don't exist on disk
-
     context = bpy.context
     props = context.window_manager.explorer_properties
+    expanded_folder_paths = context.window_manager.expanded_folder_paths
+
+    #Remove file paths from expanded_folder_paths if they don't exist on disk
+    expanded_folders = list(expanded_folder_paths)
+    for path in expanded_folders:
+        if not Path(path).exists():
+            expanded_folder_paths.discard(path)
 
     if creation_idx == 0:
         props.folder_view_list.clear()
@@ -83,7 +85,10 @@ def refresh_folder_view(new_file_path: Path | str | None = None):
 
 
 def contextual_parent_folder():
-    props = bpy.context.window_manager.explorer_properties
+    context = bpy.context
+    wm = context.window_manager
+    props = wm.explorer_properties
+    expanded_folder_paths = wm.expanded_folder_paths
     folder_view_list = props.folder_view_list
 
     if len(folder_view_list) < 1:  # Return open folder if there are no subfolders

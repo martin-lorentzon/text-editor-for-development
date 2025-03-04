@@ -1,6 +1,7 @@
 import bpy
 from bpy.types import AddonPreferences
 from bpy.props import StringProperty, BoolProperty
+from pathlib import Path
 
 
 class TextEditorForDevelopmentPreferences(AddonPreferences):
@@ -10,9 +11,18 @@ class TextEditorForDevelopmentPreferences(AddonPreferences):
         name="Default File Name",
         default="my_script.py"
     )
+
+    def get_default_folder_name(self):
+        return self.get("default_new_folder_name", "")
+    
+    def set_default_folder_name(self, value):
+        self["default_new_folder_name"] = str(Path(value).with_suffix(""))
+
     default_new_folder_name: StringProperty(
         name="Default Folder Name",
-        default="new_folder.py"
+        default="new_folder",
+        get=get_default_folder_name,
+        set=set_default_folder_name
     )
     unlink_on_file_deletion: BoolProperty(
         name="Unlink on File Deletion",
@@ -29,6 +39,11 @@ class TextEditorForDevelopmentPreferences(AddonPreferences):
             panel.prop(self, "default_new_file_name")
             panel.prop(self, "default_new_folder_name")
             panel.prop(self, "unlink_on_file_deletion")
+
+
+# ——————————————————————————————————————————————————————————————————————
+# MARK: REGISTRATION
+# ——————————————————————————————————————————————————————————————————————
 
 
 def register():
