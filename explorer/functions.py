@@ -44,7 +44,7 @@ def restore_active_file_decorator(func):
 
         result = func(*args, **kwargs)  # Original function call
 
-        # Restore active file path if possible
+        # Restore active index if possible
         if active_file_path is None:
             new_idx = 0
         else:
@@ -113,12 +113,14 @@ def contextual_parent_folder():
     expanded_folder_paths = wm.expanded_folder_paths
     folder_view_list = props.folder_view_list
 
-    if len(folder_view_list) < 1:  # Return open folder if there are no subfolders
+    if len(folder_view_list) < 1:  # Return the open folder if there are no items
         return Path(props.open_folder_path)
 
     active_idx = props.folder_view_active_index
-    if not 0 <= active_idx < len(folder_view_list):
-        return
+
+    if not 0 <= active_idx < len(folder_view_list):  # Return the open folder if the active index is invalid
+        return Path(props.open_folder_path)
+
     active_item = props.folder_view_list[active_idx]
 
     if active_item.file_path in expanded_folder_paths:

@@ -31,7 +31,6 @@ def require_valid_open_folder(cls):
 
         if original_invoke:
             return original_invoke(self, context, event)
-
         return self.execute(context)
 
     cls.invoke = invoke
