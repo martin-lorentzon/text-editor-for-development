@@ -3,7 +3,7 @@ from bpy.types import Operator
 from bpy.props import StringProperty
 from ..helpers import disable_on_empty_folder_path, require_valid_open_folder
 from ...helpers import uninitialized_preference
-from ..functions import refresh_folder_view
+from ..functions import refresh_folder_view, text_at_file_path
 from ... import __package__ as base_package
 from pathlib import Path
 from shutil import rmtree
@@ -45,8 +45,9 @@ class EXPLORER_OT_delete_file(Operator):
             else:
                 file.unlink()
                 if uninitialized_preference(addon_prefs, "unlink_on_file_deletion"):
-                    texts = bpy.data.texts
-                    texts.remove(texts[file.name])
+                    text = text_at_file_path(file)
+                    if text is not None:
+                        bpy.data.texts.remove(text)
         except FileNotFoundError:
             message = f"File {self.file_path} doesn't exist."
             self.report({"ERROR"}, message)

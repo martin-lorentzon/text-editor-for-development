@@ -2,6 +2,8 @@
 if "bpy" in locals():
     from importlib import reload
 
+    reload(helpers)
+    reload(functions)
     reload(properties)
     reload(ui)
     reload(open_folder)
@@ -12,6 +14,8 @@ if "bpy" in locals():
     reload(collapse_folders)
     reload(delete_file)
 else:
+    from . import helpers
+    from . import functions
     from . import properties
     from . import ui
     from .operators import (
@@ -52,7 +56,7 @@ classes = [
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
-    
+
     bpy.types.WindowManager.explorer_properties = bpy.props.PointerProperty(
         type=properties.ExplorerProperties,
         name="Explorer"
@@ -64,6 +68,6 @@ def register():
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
-    
+
     del bpy.types.WindowManager.explorer_properties
     del bpy.types.WindowManager.expanded_folder_paths

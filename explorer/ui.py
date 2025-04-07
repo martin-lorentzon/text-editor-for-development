@@ -1,4 +1,5 @@
 import bpy
+from .functions import text_at_file_path
 from bpy.types import UILayout, UIList, Panel
 from pathlib import Path
 
@@ -37,18 +38,19 @@ class EXPLORER_UL_folder_view_list(UIList):
         }
 
         expanded_folder_paths = context.window_manager.expanded_folder_paths
-        file_path = item.file_path
-        file_name = item.file_name
-        file_type = item.file_type
-        depth = item.depth
         is_active = item.creation_idx == active_data.folder_view_active_index
-        is_folder = Path(item.file_path).is_dir()
+
+        file_path = item.file_path
+        is_folder = Path(file_path).is_dir()
+        file_type = item.file_type
         icon = extension_to_icon.get(file_type, "FILE")
+
+        text = text_at_file_path(file_path)
 
         if self.layout_type in {"DEFAULT", "COMPACT"}:
             layout.emboss = "NONE"
 
-            for i in range(depth):
+            for i in range(item.depth):
                 spacer = layout.row()
                 spacer.ui_units_x = 1
 
@@ -63,8 +65,7 @@ class EXPLORER_UL_folder_view_list(UIList):
             else:
                 row = layout.row()
                 row.prop(item, "file_name", text="", icon=icon)
-                text_datablock = bpy.data.texts.get(file_name, None)
-                if text_datablock is not None and text_datablock.is_dirty:
+                if text is not None and text.is_dirty:
                     sub = row.row()
                     sub.alert = True
                     sub.alignment = "RIGHT"

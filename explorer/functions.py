@@ -7,6 +7,27 @@ def find_file_path_index(file_path: Path | str, default=0):
     return next((i for i, file in enumerate(folder_view_list) if file.file_path == str(file_path)), default)
 
 
+def file_path_at_index(index: int):
+    folder_view_list = bpy.context.window_manager.explorer_properties.folder_view_list
+    if index >= len(folder_view_list):
+        raise ValueError(f"Couldn't get file path, index ({index}) not in range")
+    return Path(folder_view_list[index].file_path)
+
+
+def text_at_index(index: int):
+    folder_view_list = bpy.context.window_manager.explorer_properties.folder_view_list
+    if index >= len(folder_view_list):
+        raise ValueError(f"Couldn't get text, index ({index}) not in range")
+    texts = bpy.data.texts
+    file = Path(folder_view_list[index].file_path)
+    return next((t for t in texts if Path(t.filepath).resolve() == file.resolve()), None)
+
+
+def text_at_file_path(file_path: Path | str):
+    texts = bpy.data.texts
+    return next((t for t in texts if Path(t.filepath).resolve() == Path(file_path).resolve()), None)
+
+
 def restore_active_file_decorator(func):
     def wrapper(*args, **kwargs):
         context = bpy.context
@@ -37,10 +58,11 @@ def restore_active_file_decorator(func):
 @restore_active_file_decorator
 def open_folder(folder_path: Path | str, creation_idx=0, depth=0, file_clicked_on=0):
     context = bpy.context
-    props = context.window_manager.explorer_properties
-    expanded_folder_paths = context.window_manager.expanded_folder_paths
+    wm = context.window_manager
+    props = wm.explorer_properties
+    expanded_folder_paths = wm.expanded_folder_paths
 
-    #Remove file paths from expanded_folder_paths if they don't exist on disk
+    # Remove any expanded folder paths that don't exist
     expanded_folders = list(expanded_folder_paths)
     for path in expanded_folders:
         if not Path(path).exists():
@@ -106,7 +128,8 @@ def contextual_parent_folder():
     return parent_folder
 
 
-def unique_path(destination: Path | str) -> Path:
+def unique_path(path: Path | str) -> Path:
+    destination = Path(path)
     parent = destination.parent
     original_stem = destination.stem
     suffix = destination.suffix
@@ -114,4 +137,4 @@ def unique_path(destination: Path | str) -> Path:
     while destination.exists():
         destination = parent / f"{original_stem} ({counter}){suffix}"
         counter += 1
-    return Path(destination)
+    return destination

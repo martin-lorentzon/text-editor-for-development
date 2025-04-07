@@ -1,7 +1,7 @@
 import bpy
 from bpy.props import StringProperty, IntProperty, CollectionProperty
 from pathlib import Path
-from .functions import unique_path, refresh_folder_view, open_folder
+from .functions import unique_path, refresh_folder_view, open_folder, file_path_at_index, text_at_index
 
 
 # ——————————————————————————————————————————————————————————————————————
@@ -39,7 +39,7 @@ def get_folder_view_active_index(self):
     return self.get("folder_view_active_index", 0)
 
 
-def set_folder_view_active_index(self, value): 
+def set_folder_view_active_index(self, value):
     self["folder_view_active_index"] = value
 
     folder_view_list = self.folder_view_list
@@ -53,17 +53,16 @@ def set_folder_view_active_index(self, value):
             if area.type == "TEXT_EDITOR":
                 area.spaces[0].text = text
 
-    texts = bpy.data.texts
-    file = Path(self.folder_view_list[value].file_path)
+    file = file_path_at_index(value)
+    text = text_at_index(value)
 
-    if file.name in texts:
-        text = texts[file.name]
+    if text is not None:
         show_text(text)
     else:
         try:
-            with open(file, "r") as f:
+            with open(str(file), "r") as f:
                 pass
-            text = texts.load(str(file))
+            text = bpy.data.texts.load(str(file))
             show_text(text)
         except:
             pass
