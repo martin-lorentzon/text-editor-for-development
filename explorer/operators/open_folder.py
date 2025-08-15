@@ -10,7 +10,8 @@ class EXPLORER_OT_open_folder(Operator):
 
     directory: StringProperty(
         name="Directory",
-        description="Folder to open"
+        description="Folder to open",
+        subtype="DIR_PATH"
     )
 
     filter_folder: BoolProperty(

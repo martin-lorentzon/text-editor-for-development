@@ -24,6 +24,10 @@ def text_at_index(index: int):
 
 
 def text_at_file_path(file_path: Path | str):
+    """
+    Exists because getting texts by their name isn't enough >> bpy.data.texts.get(file.name)
+    Files of different folders often share the same name, hence this is a safer approach and necessary.
+    """
     texts = bpy.data.texts
     return next((t for t in texts if Path(t.filepath).resolve() == Path(file_path).resolve()), None)
 

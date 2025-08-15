@@ -24,11 +24,31 @@ def require_valid_open_folder(cls):
         props = context.window_manager.explorer_properties
 
         if not Path(props.open_folder_path).is_dir():
-            self.report({"ERROR"}, "The currently opened folder does not exist.")
+            self.report({"ERROR"}, "The currently opened folder no longer exists.")
             props.open_folder_path = ""
             refresh_folder_view()
             return {"CANCELLED"}
 
+        if original_invoke:
+            return original_invoke(self, context, event)
+        return self.execute(context)
+
+    cls.invoke = invoke
+    return cls
+
+
+def require_valid_active_file(cls):
+    original_invoke = getattr(cls, "invoke", None)
+
+    def invoke(self, context, event):
+        props = context.window_manager.explorer_properties
+        file = Path(props.folder_view_list[props.folder_view_active_index].file_path)
+        
+        if not file.exists():
+            self.report({"ERROR"}, "The currently active file no longer exists.")
+            refresh_folder_view()
+            return {"CANCELLED"}
+        
         if original_invoke:
             return original_invoke(self, context, event)
         return self.execute(context)

@@ -9,7 +9,7 @@ class TextEditorForDevelopmentPreferences(AddonPreferences):
 
     default_new_file_name: StringProperty(
         name="Default File Name",
-        default="my_script.py"
+        default="new_script.py"
     )
 
     def get_default_folder_name(self):
@@ -24,6 +24,7 @@ class TextEditorForDevelopmentPreferences(AddonPreferences):
         get=get_default_folder_name,
         set=set_default_folder_name
     )
+    
     unlink_on_file_deletion: BoolProperty(
         name="Unlink on File Deletion",
         default=True

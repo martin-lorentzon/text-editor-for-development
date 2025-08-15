@@ -1,16 +1,17 @@
 import bpy
 from bpy.types import Operator
 from bpy.props import StringProperty
-from ..helpers import disable_on_empty_folder_path, require_valid_open_folder
+from ..helpers import disable_on_empty_folder_path, require_valid_open_folder, require_valid_active_file
 from ...helpers import uninitialized_preference
 from ..functions import refresh_folder_view, text_at_file_path
 from ... import __package__ as base_package
 from pathlib import Path
-from shutil import rmtree
+import send2trash
 
 
 @disable_on_empty_folder_path
 @require_valid_open_folder
+@require_valid_active_file
 class EXPLORER_OT_delete_file(Operator):
     bl_idname = "text.delete_file"
     bl_label = "Delete File"
@@ -39,20 +40,29 @@ class EXPLORER_OT_delete_file(Operator):
         file = Path(self.file_path)
         is_folder = file.is_dir()
 
-        try:
-            if is_folder:
-                rmtree(file)
-            else:
-                file.unlink()
-                if uninitialized_preference(addon_prefs, "unlink_on_file_deletion"):
-                    text = text_at_file_path(file)
+        def unlink_contents_recursive(folder: Path):
+            for item in folder.iterdir():
+                if not item.exists():
+                    continue
+
+                if item.is_dir():
+                    unlink_contents_recursive(item)
+                else:
+                    text = text_at_file_path(item)
+
                     if text is not None:
                         bpy.data.texts.remove(text)
-        except FileNotFoundError:
-            message = f"File {self.file_path} doesn't exist."
-            self.report({"ERROR"}, message)
-            refresh_folder_view()
-            return {"CANCELLED"}
+
+        if is_folder:
+            if uninitialized_preference(addon_prefs, "unlink_on_file_deletion"):
+                unlink_contents_recursive(file)
+            send2trash.send2trash(file)
+        else:
+            if uninitialized_preference(addon_prefs, "unlink_on_file_deletion"):
+                text = text_at_file_path(file)
+                if text is not None:
+                    bpy.data.texts.remove(text)
+            send2trash.send2trash(file)
 
         props = context.window_manager.explorer_properties
         folder_view_list = props.folder_view_list

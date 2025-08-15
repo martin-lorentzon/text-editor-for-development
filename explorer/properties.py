@@ -1,7 +1,7 @@
 import bpy
 from bpy.props import StringProperty, IntProperty, CollectionProperty
 from pathlib import Path
-from .functions import unique_path, refresh_folder_view, open_folder, file_path_at_index, text_at_index
+from .functions import unique_path, refresh_folder_view, open_folder, file_path_at_index, text_at_index, text_at_file_path
 
 
 # ——————————————————————————————————————————————————————————————————————
@@ -19,10 +19,14 @@ def set_file_name(self, value):
     parent = source.parent
     destination: Path = parent / value
 
-    # Is true for when the file is first loaded
-    if str(destination) == self.file_path:
+    if str(destination) == self.file_path:  # Is true for when the file is first loaded
         self["file_name"] = value
         return
+    
+    text = text_at_file_path(source)
+
+    if text:
+        bpy.data.texts.remove(text)
 
     unique_destination = unique_path(destination)
     source.rename(unique_destination)

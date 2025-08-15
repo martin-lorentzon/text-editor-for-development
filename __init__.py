@@ -1,6 +1,6 @@
 bl_info = {
     "name": "Text Editor for Development",
-    "description": "Reimagining the Text Editor for new add-on developers.",
+    "description": "Quality-of-life improvements for add-on developers.",
     "author": "Martin Lorentzon",
     "version": (1, 0, 0),
     "blender": (4, 2, 0),

@@ -29,8 +29,8 @@ class EXPLORER_UL_folder_view_list(UIList):
             ".mp4": "FILE_MOVIE", ".mov": "FILE_MOVIE", ".avi": "FILE_MOVIE", ".mkv": "FILE_MOVIE",
             ".flv": "FILE_MOVIE", ".webm": "FILE_MOVIE", ".mpeg": "FILE_MOVIE", ".prores": "FILE_MOVIE",
             ".obj": "FILE_3D", ".fbx": "FILE_3D", ".stl": "FILE_3D", ".gltf": "FILE_3D", ".glb": "FILE_3D",
-            ".ply": "FILE_3D", ".dae": "FILE_3D", ".usd": "FILE_3D", ".usdz": "FILE_3D", ".usda": "FILE_3D",
-            ".abc": "FILE_3D",
+            ".usd": "FILE_3D", ".usda": "FILE_3D", ".usdc": "FILE_3D", ".usdz": "FILE_3D",
+            ".ply": "FILE_3D", ".abc": "FILE_3D", ".dae": "FILE_3D",
             ".ttf": "FILE_FONT", ".otf": "FILE_FONT", ".dfont": "FILE_FONT", ".fon": "FILE_FONT", ".ttc": "FILE_FONT",
             ".mp3": "FILE_SOUND", ".wav": "FILE_SOUND", ".flac": "FILE_SOUND", ".aac": "FILE_SOUND",
             ".vdb": "FILE_VOLUME",
@@ -40,12 +40,14 @@ class EXPLORER_UL_folder_view_list(UIList):
         expanded_folder_paths = context.window_manager.expanded_folder_paths
         is_active = item.creation_idx == active_data.folder_view_active_index
 
-        file_path = item.file_path
-        is_folder = Path(file_path).is_dir()
+        file = Path(item.file_path)
+        is_folder = file.is_dir()
         file_type = item.file_type
+        
         icon = extension_to_icon.get(file_type, "FILE")
 
-        text = text_at_file_path(file_path)
+        text = text_at_file_path(file)
+        is_unsaved = text is not None and text.is_dirty
 
         if self.layout_type in {"DEFAULT", "COMPACT"}:
             layout.emboss = "NONE"
@@ -55,24 +57,30 @@ class EXPLORER_UL_folder_view_list(UIList):
                 spacer.ui_units_x = 1
 
             if is_folder:
-                icon = "DOWNARROW_HLT" if file_path in expanded_folder_paths else "RIGHTARROW"
+                icon = "DOWNARROW_HLT" if str(file) in expanded_folder_paths else "RIGHTARROW"
                 op = layout.operator("text.toggle_expand_folder", text="", icon=icon)
-                op.folder_path = file_path
+                op.folder_path = str(file)
+
                 layout.prop(item, "file_name", text="")
+
                 if is_active:
                     op = layout.operator("text.delete_file", text="", icon="TRASH")
-                    op.file_path = file_path
+                    op.file_path = str(file)
             else:
                 row = layout.row()
                 row.prop(item, "file_name", text="", icon=icon)
-                if text is not None and text.is_dirty:
+
+                if is_unsaved:
+                    if is_active:
+                        row.operator("text.save", text="", icon="FILE_TICK")
                     sub = row.row()
-                    sub.alert = True
                     sub.alignment = "RIGHT"
+                    sub.alert = True
                     sub.label(text="Unsaved")
+
                 if is_active:
-                    op = layout.operator("text.delete_file", text="", icon="TRASH")
-                    op.file_path = file_path
+                    op = row.operator("text.delete_file", text="", icon="TRASH")
+                    op.file_path = str(file)
 
         elif self.layout_type == "GRID":
             layout.alignment = "CENTER"
@@ -96,7 +104,6 @@ class EXPLORER_PT_explorer_panel(Panel):
         row = header.row(align=True)
         folder_text = folder_name if folder_name != "" else "Open Folder"
         row.operator("text.open_folder", text=folder_text)
-        row.operator_context = "EXEC_DEFAULT"
         row.operator("text.create_new_file", text="", icon="FILE_NEW")
         row.operator("text.create_new_folder", text="", icon="NEWFOLDER")
         row.operator_context = "INVOKE_DEFAULT"
