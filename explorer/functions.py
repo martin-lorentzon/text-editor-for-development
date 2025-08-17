@@ -10,14 +10,14 @@ def find_file_path_index(file_path: Path | str, default=0):
 def file_path_at_index(index: int):
     folder_view_list = bpy.context.window_manager.explorer_properties.folder_view_list
     if index >= len(folder_view_list):
-        raise ValueError(f"Couldn't get file path, index ({index}) not in range")
+        raise ValueError(f"[file_path_at_index] Index ({index}) out of range")
     return Path(folder_view_list[index].file_path)
 
 
 def text_at_index(index: int):
     folder_view_list = bpy.context.window_manager.explorer_properties.folder_view_list
     if index >= len(folder_view_list):
-        raise ValueError(f"Couldn't get text, index ({index}) not in range")
+        raise ValueError(f"[text_at_index] Index ({index}) out of range")
     texts = bpy.data.texts
     file = Path(folder_view_list[index].file_path)
     return next((t for t in texts if Path(t.filepath).resolve() == file.resolve()), None)
