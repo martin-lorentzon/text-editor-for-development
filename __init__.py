@@ -24,9 +24,15 @@ if "bpy" in locals():
 
     reload(addon_preferences)
     reload(explorer)
+    reload(remote_content)
 else:
+    from . import addon_preferences
+    from . import explorer
+    from . import remote_content
+    
     from .addon_preferences import register as register_preferences, unregister as unregister_preferences
     from .explorer import register as register_explorer, unregister as unregister_explorer
+    from .remote_content import register as register_remote_content, unregister as unregister_remote_content
 
 import bpy
 # fmt: on
@@ -40,11 +46,13 @@ import bpy
 def register():
     register_preferences()
     register_explorer()
+    register_remote_content()
 
 
 def unregister():
     unregister_preferences()
     unregister_explorer()
+    unregister_remote_content()
 
 
 if __name__ == "__main__":
