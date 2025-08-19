@@ -107,7 +107,8 @@ def refresh_folder_view(new_file_path: Path | str | None = None, redraw_only: bo
     context = bpy.context
     props = context.window_manager.explorer_properties
 
-    open_folder(props.open_folder_path)
+    if not redraw_only:
+        open_folder(props.open_folder_path)
 
     if new_file_path is not None:
         props.folder_view_active_index = find_file_path_index(new_file_path)
