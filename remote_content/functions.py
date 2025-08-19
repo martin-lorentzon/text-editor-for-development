@@ -2,10 +2,10 @@ import subprocess
 from pathlib import Path
 
 
-GIT_NOT_FOUND_MSG = "Git is not installed or not found in PATH."
+GIT_NOT_FOUND_MSG = "Git is not installed or not found in PATH"
 GIT_AVAILABLE_MSG = "Git is available: {result}"
 GIT_FAILURE_MSG = "Git command failed: {error}"
-GIT_SUCCEEDED_MSG = "Git successfully cloned remote contents to: {local_path}"
+GIT_SUCCEEDED_MSG = "Successfully cloned remote contents to: {local_path}"
 DIRECTORY_NOT_EMPTY_MSG = "Failed to clone remote contents: The specified local directory has items inside"
 UNEXPECTED_ERROR_MSG = "Unexpected error: {error}"
 

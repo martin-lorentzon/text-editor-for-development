@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import Operator
-from bpy.props import StringProperty, BoolProperty
+from bpy.props import StringProperty
 from ..functions import is_git_installed, clone_git_repo
 import webbrowser
 
@@ -26,22 +26,18 @@ class REMOTE_CONTENT_OT_clone_repository(Operator):
         subtype="DIR_PATH"
     )
 
-    missing_git: BoolProperty()
-
     def invoke(self, context, event):
         wm = context.window_manager
         
-        self.missing_git = False
         if is_git_installed() == False:
             title ="Git is not installed"
             message = "Please install Git in order to clone remote contents."
             confirm_text = "To Downloads"
-            self.missing_git = True 
             return wm.invoke_confirm(self, event, title=title, message=message, confirm_text=confirm_text, icon="INFO")
         return wm.invoke_props_dialog(self, title=self.title, confirm_text=self.confirm_text)
 
     def execute(self, context):
-        if self.missing_git:
+        if is_git_installed() == False:  # Second check needed in case the operator is called from script
             webbrowser.open_new_tab("https://git-scm.com/downloads")
             return {"FINISHED"}
         
