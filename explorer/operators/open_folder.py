@@ -5,18 +5,18 @@ from bpy.props import StringProperty, BoolProperty
 class EXPLORER_OT_open_folder(Operator):
     bl_idname = "text.open_folder"
     bl_label = "Open Folder"
-    bl_description = "Allows you to quickly search over all files in the currently opened folder"
+    bl_description = "Quickly search all files in the current folder"
     bl_options = {"INTERNAL"}
 
     directory: StringProperty(
         name="Directory",
-        description="Folder to open",
+        description="The folder to open",
         subtype="DIR_PATH"
     )
 
     filter_folder: BoolProperty(
         default=True,
-        options={"HIDDEN"}  # Hides filtered-out objects
+        options={"HIDDEN"}  # Hides filtered-out objects (non-folders)
     )
 
     def invoke(self, context, event):
