@@ -103,7 +103,7 @@ def open_folder(folder_path: Path | str, creation_idx=0, depth=0, file_clicked_o
     return creation_idx  # Ensure index continuity
 
 
-def refresh_folder_view(new_file_path: Path | str | None = None):
+def refresh_folder_view(new_file_path: Path | str | None = None, redraw_only: bool = False):
     context = bpy.context
     props = context.window_manager.explorer_properties
 

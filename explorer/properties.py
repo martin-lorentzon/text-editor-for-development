@@ -95,6 +95,7 @@ class ExplorerProperties(bpy.types.PropertyGroup):
 
     def set_open_folder_path(self, value):
         open_folder(Path(value))
+        refresh_folder_view(redraw_only=True)
         self["open_folder_path"] = value
 
     open_folder_path: StringProperty(
