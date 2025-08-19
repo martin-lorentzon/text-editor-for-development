@@ -1,6 +1,7 @@
 import bpy
 from bpy.types import AddonPreferences
 from bpy.props import StringProperty, BoolProperty
+from .explorer.functions import refresh_folder_view
 from pathlib import Path
 
 
@@ -24,7 +25,21 @@ class TextEditorForDevelopmentPreferences(AddonPreferences):
         get=get_default_folder_name,
         set=set_default_folder_name
     )
+
+    def get_show_hidden_items(self):
+        return self.get("show_hidden_items", False)
+
+    def set_show_hidden_items(self, value):
+        self["show_hidden_items"] = value
+        refresh_folder_view()
     
+    show_hidden_items: BoolProperty(
+        name="Show Hidden Items",
+        default=False,
+        get=get_show_hidden_items,
+        set=set_show_hidden_items
+    )
+
     unlink_on_file_deletion: BoolProperty(
         name="Unlink on File Deletion",
         default=True
@@ -39,6 +54,7 @@ class TextEditorForDevelopmentPreferences(AddonPreferences):
         if panel:
             panel.prop(self, "default_new_file_name")
             panel.prop(self, "default_new_folder_name")
+            panel.prop(self, "show_hidden_items")
             panel.prop(self, "unlink_on_file_deletion")
 
 
