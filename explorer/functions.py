@@ -103,11 +103,12 @@ def open_folder(folder_path: Path | str, creation_idx=0, depth=0, file_clicked_o
     return creation_idx  # Ensure index continuity
 
 
-def refresh_folder_view(new_file_path: Path | str | None = None):
+def refresh_folder_view(new_file_path: Path | str | None = None, redraw_only: bool = False):
     context = bpy.context
     props = context.window_manager.explorer_properties
 
-    open_folder(props.open_folder_path)
+    if not redraw_only:
+        open_folder(props.open_folder_path)
 
     if new_file_path is not None:
         props.folder_view_active_index = find_file_path_index(new_file_path)
