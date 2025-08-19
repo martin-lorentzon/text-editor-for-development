@@ -40,17 +40,17 @@ class REMOTE_CONTENT_OT_clone_repository(Operator):
         if is_git_installed() == False:  # Second check needed in case the operator is called from script
             webbrowser.open_new_tab("https://git-scm.com/downloads")
             return {"FINISHED"}
-        
+
         success, message = clone_git_repo(self.repository_url, self.directory)
 
         if not success:
             self.report({"ERROR"}, message)
             return {"CANCELLED"}
-        
+
         self.report({"INFO"}, message)
         bpy.ops.text.open_folder(directory=self.directory)
         return {"FINISHED"}
-    
+
     def draw(self, context):
         layout = self.layout
 
