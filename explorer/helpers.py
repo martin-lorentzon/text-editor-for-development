@@ -17,7 +17,7 @@ def disable_on_empty_folder_path(cls):
     return cls
 
 
-def require_valid_open_folder(cls):
+def require_valid_open_folder(cls):  # TODO: Create an equivalent decorator for functions/setters
     original_invoke = getattr(cls, "invoke", None)
 
     def invoke(self, context, event):
@@ -37,7 +37,7 @@ def require_valid_open_folder(cls):
     return cls
 
 
-def require_valid_active_file(cls):
+def require_valid_active_file(cls):  # TODO: Create an equivalent decorator for functions/setters
     original_invoke = getattr(cls, "invoke", None)
 
     def invoke(self, context, event):
