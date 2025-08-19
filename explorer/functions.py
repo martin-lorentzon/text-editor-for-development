@@ -1,4 +1,6 @@
 import bpy
+from ..helpers import uninitialized_preference
+from .. import __package__ as base_package
 from pathlib import Path
 
 
@@ -63,6 +65,7 @@ def restore_active_file_decorator(func):
 def open_folder(folder_path: Path | str, creation_idx=0, depth=0, file_clicked_on=0):
     context = bpy.context
     wm = context.window_manager
+    addon_prefs = context.preferences.addons[base_package].preferences
     props = wm.explorer_properties
     expanded_folder_paths: set = wm.expanded_folder_paths
 
@@ -88,7 +91,11 @@ def open_folder(folder_path: Path | str, creation_idx=0, depth=0, file_clicked_o
         )
     )
 
+    show_hidden_items = uninitialized_preference(addon_prefs, "show_hidden_items")
+
     for file in files:
+        if file.name.startswith(".") and not show_hidden_items:
+            continue
         item = props.folder_view_list.add()
         item.file_path = str(file)
         item.file_name = file.name
