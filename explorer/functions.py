@@ -64,7 +64,12 @@ def open_folder(folder_path: Path | str, creation_idx=0, depth=0, file_clicked_o
     context = bpy.context
     wm = context.window_manager
     props = wm.explorer_properties
-    expanded_folder_paths = wm.expanded_folder_paths
+    expanded_folder_paths: set = wm.expanded_folder_paths
+
+    if folder_path == "":
+        props.folder_view_list.clear()
+        expanded_folder_paths.clear()
+        return
 
     # Remove any expanded folder paths that don't exist
     expanded_folders = list(expanded_folder_paths)
@@ -107,7 +112,10 @@ def refresh_folder_view(new_file_path: Path | str | None = None):
     if new_file_path is not None:
         props.folder_view_active_index = find_file_path_index(new_file_path)
 
-    context.area.tag_redraw()
+    for area in context.screen.areas:
+        for region in area.regions:
+            if region.type == "UI":
+                region.tag_redraw()
 
 
 def contextual_parent_folder():
