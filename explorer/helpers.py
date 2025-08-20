@@ -1,3 +1,4 @@
+from bpy.types import Operator
 from pathlib import Path
 from .functions import refresh_folder_view
 
@@ -17,40 +18,45 @@ def disable_on_empty_folder_path(cls):
     return cls
 
 
-def require_valid_open_folder(cls):  # TODO: Create an equivalent decorator for functions/setters
+def require_valid_open_folder(cls):
     original_invoke = getattr(cls, "invoke", None)
 
-    def invoke(self, context, event):
+    def invoke(self: Operator, context, event):
         props = context.window_manager.explorer_properties
+        folder = Path(props.open_folder_path)
 
-        if not Path(props.open_folder_path).is_dir():
-            self.report({"ERROR"}, "The currently opened folder no longer exists.")
+        # New invoke logic
+        if folder.is_dir() == False:
+            self.report({"ERROR"}, "The selected opened folder no longer exists or is not a directory.")
             props.open_folder_path = ""
             refresh_folder_view()
             return {"CANCELLED"}
-
-        if original_invoke:
+        
+        if original_invoke:  # Existing invoke
             return original_invoke(self, context, event)
+        
+        # Default invoke logic
         return self.execute(context)
 
     cls.invoke = invoke
     return cls
 
 
-def require_valid_active_file(cls):  # TODO: Create an equivalent decorator for functions/setters
+def require_valid_active_file(cls):
     original_invoke = getattr(cls, "invoke", None)
 
-    def invoke(self, context, event):
+    def invoke(self: Operator, context, event):
         props = context.window_manager.explorer_properties
         file = Path(props.folder_view_list[props.folder_view_active_index].file_path)
-        
-        if not file.exists():
-            self.report({"ERROR"}, "The currently active file no longer exists.")
+
+        if file.exists() == False:
+            self.report({"ERROR"}, "The active item no longer exists.")
             refresh_folder_view()
             return {"CANCELLED"}
         
         if original_invoke:
             return original_invoke(self, context, event)
+        
         return self.execute(context)
 
     cls.invoke = invoke

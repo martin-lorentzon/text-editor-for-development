@@ -121,9 +121,10 @@ def refresh_folder_view(new_file_path: Path | str | None = None, redraw_only: bo
         props.folder_view_active_index = find_file_path_index(new_file_path)
 
     for area in context.screen.areas:
-        for region in area.regions:
-            if region.type == "UI":
-                region.tag_redraw()
+        if area.type == "TEXT_EDITOR":
+            for region in area.regions:
+                if region.type == "UI":
+                    region.tag_redraw()
 
 
 def contextual_parent_folder():

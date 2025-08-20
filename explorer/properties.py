@@ -72,6 +72,17 @@ def set_folder_view_active_index(self, value):
             pass
 
 
+# Open folder path (GETTER/SETTER)
+def get_open_folder_path(self):
+        return self.get("open_folder_path", "")
+
+
+def set_open_folder_path(self, value):
+    open_folder(Path(value))
+    refresh_folder_view(redraw_only=True)
+    self["open_folder_path"] = value
+
+
 # ——————————————————————————————————————————————————————————————————————
 # MARK: PROPERTY DEFINITIONS
 # ——————————————————————————————————————————————————————————————————————
@@ -90,14 +101,6 @@ class FileItemProperties(bpy.types.PropertyGroup):
 
 
 class ExplorerProperties(bpy.types.PropertyGroup):
-    def get_open_folder_path(self):
-        return self.get("open_folder_path", "")
-
-    def set_open_folder_path(self, value):
-        open_folder(Path(value))
-        refresh_folder_view(redraw_only=True)
-        self["open_folder_path"] = value
-
     open_folder_path: StringProperty(
         name="Open Folder Path",
         get=get_open_folder_path,
