@@ -5,17 +5,17 @@ schema_version = "1.0.0"
 id = "text_editor_for_development"
 version = "1.0.0"
 name = "Text Editor for Development"
-tagline = "Quality-of-life improvements for add-on developers"
+tagline = "Text Editor enhancements for add-on developers"
 maintainer = "Martin Lorentzon <mtlorentzon@proton.me>"
 # Supported types: "add-on", "theme"
 type = "add-on"
 
 # # Optional: link to documentation, support, source files, etc
-# website = "https://extensions.blender.org/add-ons/my-example-package/"
+website = "https://github.com/martin-lorentzon/text-editor-for-development"
 
 # # Optional: tag list defined by Blender and server, see:
 # # https://docs.blender.org/manual/en/dev/advanced/extensions/tags.html
-# tags = ["Animation", "Sequencer"]
+tags = ["Text Editor", "Development", "User Interface"]
 
 blender_version_min = "4.2.0"
 # # Optional: Blender version that the extension does not support, earlier versions are supported.
@@ -58,9 +58,8 @@ wheels = [
 # # For longer explanations use the documentation or detail page.
 #
 [permissions]
-# network = "Need to sync motion-capture data to server"
-files = "Specify directory path in preferences"
-# clipboard = "Copy and paste bone transforms"
+network = "Clone remote Git repositories for add-on templates"
+files = "Specify folder to preview for file-browsing/editing"
 
 # # Optional: advanced build settings.
 # # https://docs.blender.org/manual/en/dev/advanced/extensions/command_line_arguments.html#command-line-args-extension-build
@@ -69,7 +68,9 @@ files = "Specify directory path in preferences"
 # # You only need to edit them if you want different options.
 paths_exclude_pattern = [
     "__pycache__/",
+    "images",
     "/.git*",
     "/*.zip",
     "/*.bat",
+    "README.md"
 ]

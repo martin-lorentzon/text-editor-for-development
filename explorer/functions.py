@@ -54,7 +54,7 @@ def restore_active_file_decorator(func):
         if active_file_path is None:
             new_idx = 0
         else:
-            new_idx = find_file_path_index(active_file_path, file_clicked_on)
+            new_idx = find_file_path_index(active_file_path, default=file_clicked_on)
 
         props.folder_view_active_index = new_idx
         return result

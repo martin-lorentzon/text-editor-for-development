@@ -29,12 +29,21 @@ class REMOTE_CONTENT_OT_clone_repository(Operator):
     def invoke(self, context, event):
         wm = context.window_manager
         
+        if bpy.app.version >= (4, 1, 0):
+            install_git_kwargs = dict(
+                title="Git is not installed",
+                message="Please install Git in order to clone remote contents.",
+                confirm_text="To Downloads",
+                icon="INFO"
+            )
+            clone_dialog_kwargs = dict(title=self.title, confirm_text=self.confirm_text)
+        else:
+            install_git_kwargs = {}
+            clone_dialog_kwargs = {}
+
         if is_git_installed() == False:
-            title ="Git is not installed"
-            message = "Please install Git in order to clone remote contents."
-            confirm_text = "To Downloads"
-            return wm.invoke_confirm(self, event, title=title, message=message, confirm_text=confirm_text, icon="INFO")
-        return wm.invoke_props_dialog(self, title=self.title, confirm_text=self.confirm_text)
+            return wm.invoke_confirm(self, event, **install_git_kwargs)
+        return wm.invoke_props_dialog(self, **clone_dialog_kwargs)
 
     def execute(self, context):
         if is_git_installed() == False:  # Second check needed in case the operator is called from script
