@@ -25,7 +25,7 @@
 
 ## Requirements
 - [**Git**](https://git-scm.com/downloads) added to PATH (to clone remote content/repositories)  
-    (This can be accomplished during the installataion of Git)
+    (This can be accomplished during the installation of Git)
 
 ## Compatibility
 The extension has been tested using Blender 4.5.1 LTS  
