@@ -5,7 +5,7 @@ schema_version = "1.0.0"
 id = "text_editor_for_development"
 version = "1.0.0"
 name = "Text Editor for Development"
-tagline = "Text Editor enhancements for add-on developers"
+tagline = "Text Editor enhancements for add-on development"
 maintainer = "Martin Lorentzon <mtlorentzon@proton.me>"
 # Supported types: "add-on", "theme"
 type = "add-on"
@@ -17,7 +17,7 @@ website = "https://github.com/martin-lorentzon/text-editor-for-development"
 # # https://docs.blender.org/manual/en/dev/advanced/extensions/tags.html
 tags = ["Text Editor", "Development", "User Interface"]
 
-blender_version_min = "4.2.0"
+blender_version_min = "4.5.0"
 # # Optional: Blender version that the extension does not support, earlier versions are supported.
 # # This can be omitted and defined later on the extensions platform if an issue is found.
 # blender_version_max = "5.1.0"

@@ -49,42 +49,37 @@ class EXPLORER_UL_folder_view_list(UIList):
         text = text_at_file_path(file)
         is_unsaved = text is not None and text.is_dirty
 
-        if self.layout_type in {"DEFAULT", "COMPACT"}:
-            layout.emboss = "NONE"
+        layout.emboss = "NONE"
 
-            for i in range(item.depth):
-                spacer = layout.row()
-                spacer.ui_units_x = 1
+        for i in range(item.depth):
+            spacer = layout.row()
+            spacer.ui_units_x = 1
 
-            if is_folder:
-                icon = "DOWNARROW_HLT" if str(file) in expanded_folder_paths else "RIGHTARROW"
-                op = layout.operator("text.toggle_expand_folder", text="", icon=icon)
-                op.folder_path = str(file)
+        if is_folder:
+            icon = "DOWNARROW_HLT" if str(file) in expanded_folder_paths else "RIGHTARROW"
+            op = layout.operator("text.toggle_expand_folder", text="", icon=icon)
+            op.folder_path = str(file)
 
-                layout.prop(item, "file_name", text="")
+            layout.prop(item, "file_name", text="")
 
+            if is_active:
+                op = layout.operator("text.delete_file", text="", icon="TRASH")
+                op.file_path = str(file)
+        else:
+            row = layout.row()
+            row.prop(item, "file_name", text="", icon=icon)
+
+            if is_unsaved:
                 if is_active:
-                    op = layout.operator("text.delete_file", text="", icon="TRASH")
-                    op.file_path = str(file)
-            else:
-                row = layout.row()
-                row.prop(item, "file_name", text="", icon=icon)
+                    row.operator("text.save", text="", icon="FILE_TICK")
+                sub = row.row()
+                sub.alignment = "RIGHT"
+                sub.alert = True
+                sub.label(text="Unsaved")
 
-                if is_unsaved:
-                    if is_active:
-                        row.operator("text.save", text="", icon="FILE_TICK")
-                    sub = row.row()
-                    sub.alignment = "RIGHT"
-                    sub.alert = True
-                    sub.label(text="Unsaved")
-
-                if is_active:
-                    op = row.operator("text.delete_file", text="", icon="TRASH")
-                    op.file_path = str(file)
-
-        elif self.layout_type == "GRID":
-            layout.alignment = "CENTER"
-            layout.label(text="", icon_value=icon)
+            if is_active:
+                op = row.operator("text.delete_file", text="", icon="TRASH")
+                op.file_path = str(file)
 
 
 class EXPLORER_PT_explorer_panel(Panel):

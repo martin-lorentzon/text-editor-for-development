@@ -1,9 +1,9 @@
 bl_info = {
     "name": "Text Editor for Development",
-    "description": "Quality-of-life improvements for add-on developers.",
+    "description": "Text Editor enhancements for add-on development",
     "author": "Martin Lorentzon",
     "version": (1, 0, 0),
-    "blender": (4, 2, 0),
+    "blender": (4, 5, 0),
     "location": "Text Editor > Sidebar > Dev",
     "doc_url": "https://github.com/martin-lorentzon/text-editor-for-development",
     "tracker_url": "https://github.com/martin-lorentzon/text-editor-for-development/issues",
@@ -29,10 +29,6 @@ else:
     from . import addon_preferences
     from . import explorer
     from . import remote_content
-    
-    from .addon_preferences import register as register_preferences, unregister as unregister_preferences
-    from .explorer import register as register_explorer, unregister as unregister_explorer
-    from .remote_content import register as register_remote_content, unregister as unregister_remote_content
 
 import bpy
 # fmt: on
@@ -43,16 +39,21 @@ import bpy
 # ——————————————————————————————————————————————————————————————————————
 
 
+modules = [
+    addon_preferences,
+    explorer,
+    remote_content
+]
+
+
 def register():
-    register_preferences()
-    register_explorer()
-    register_remote_content()
+    for module in modules:
+        module.register()
 
 
 def unregister():
-    unregister_preferences()
-    unregister_explorer()
-    unregister_remote_content()
+    for module in reversed(modules):
+        module.unregister()
 
 
 if __name__ == "__main__":
