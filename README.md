@@ -40,6 +40,6 @@ Please report any problems around backward compatibility using [GitHub Issues](h
 | -------------------------------------------------- | ---------- | -------- |
 | VSCode-like folder view                            | ✅ Done     | –        |
 | Cloning of remote content (e.g., add-on templates) | ✅ Done     | –        |
-| BPY self-paced learning material                   | ⬜ Not Done | ⚡⚡⚡  |
-| Reuse of code snippets + Context menu redesign     | ⬜ Not Done | ⚡       |
+| BPY self-paced learning material                   | ⬜ Not Done | High     |
+| Reuse of code snippets + Context menu redesign     | ⬜ Not Done | Low      |
 | ❔                                                 | ⬜ Not Done | –        |

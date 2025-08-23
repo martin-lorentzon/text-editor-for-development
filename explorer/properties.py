@@ -78,7 +78,11 @@ def get_open_folder_path(self):
 
 
 def set_open_folder_path(self, value):
-    open_folder(Path(value))
+    folder = Path(value)
+    if not folder.is_dir():
+        print(f"Failed to set property open_folder_path - {value} is not a directory")
+        return
+    open_folder(folder)
     refresh_folder_view(redraw_only=True)
     self["open_folder_path"] = value
 
