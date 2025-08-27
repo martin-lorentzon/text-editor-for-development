@@ -1,9 +1,11 @@
 from bpy.types import Operator
 from bpy.props import StringProperty, BoolProperty
+from ..properties import INVALID_OPEN_FOLDER_MSG
+from pathlib import Path
 
 
 class EXPLORER_OT_open_folder(Operator):
-    bl_idname = "text.open_folder"
+    bl_idname = "wm.explorer_open_folder"
     bl_label = "Open Folder"
     bl_description = "Quickly search all files in the current folder"
     bl_options = {"INTERNAL"}
@@ -26,6 +28,12 @@ class EXPLORER_OT_open_folder(Operator):
     def execute(self, context):
         wm = context.window_manager
         props = wm.explorer_properties
+
+        folder = Path(self.directory)
+
+        if folder.is_dir() == False:
+            self.report({"ERROR"}, INVALID_OPEN_FOLDER_MSG.format(folder=self.directory))
+            return {"CANCELLED"}
 
         wm.expanded_folder_paths.clear()
         props.open_folder_path = self.directory

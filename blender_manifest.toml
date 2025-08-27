@@ -3,7 +3,7 @@ schema_version = "1.0.0"
 # Example of manifest file for a Blender extension
 # Change the values according to your extension
 id = "text_editor_for_development"
-version = "1.0.1"
+version = "1.0.3"
 name = "Text Editor for Development"
 tagline = "Text Editor enhancements for add-on development"
 maintainer = "Martin Lorentzon <mtlorentzon@proton.me>"
@@ -15,7 +15,7 @@ website = "https://github.com/martin-lorentzon/text-editor-for-development"
 
 # # Optional: tag list defined by Blender and server, see:
 # # https://docs.blender.org/manual/en/dev/advanced/extensions/tags.html
-tags = ["Text Editor", "Development", "User Interface"]
+tags = ["Text Editor", "Development"]
 
 blender_version_min = "4.5.0"
 # # Optional: Blender version that the extension does not support, earlier versions are supported.

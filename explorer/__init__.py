@@ -2,8 +2,9 @@
 if "bpy" in locals():
     from importlib import reload
 
-    reload(helpers)
+    reload(constants)
     reload(functions)
+    reload(helpers)
     reload(properties)
     reload(ui)
     reload(open_folder)
@@ -14,8 +15,9 @@ if "bpy" in locals():
     reload(collapse_folders)
     reload(delete_file)
 else:
-    from . import helpers
+    from . import constants
     from . import functions
+    from . import helpers
     from . import properties
     from . import ui
     from .operators import (

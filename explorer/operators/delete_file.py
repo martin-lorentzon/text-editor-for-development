@@ -1,12 +1,17 @@
 import bpy
 from bpy.types import Operator
 from bpy.props import StringProperty
-from ..helpers import disable_on_empty_folder_path, require_valid_open_folder, require_valid_active_file
 from ...helpers import uninitialized_preference
-from ..functions import refresh_folder_view, text_at_file_path
+from ..helpers import (
+    disable_on_empty_folder_path, 
+    require_valid_open_folder, 
+    require_valid_active_file, 
+    refresh_folder_view
+    )
+from ..functions import text_at_file_path
 from ... import __package__ as base_package
 from pathlib import Path
-import send2trash
+from send2trash import send2trash
 
 
 @disable_on_empty_folder_path
@@ -56,13 +61,13 @@ class EXPLORER_OT_delete_file(Operator):
         if is_folder:
             if uninitialized_preference(addon_prefs, "unlink_on_file_deletion"):
                 unlink_contents_recursive(file)
-            send2trash.send2trash(file)
+            send2trash(file)
         else:
             if uninitialized_preference(addon_prefs, "unlink_on_file_deletion"):
                 text = text_at_file_path(file)
                 if text is not None:
                     bpy.data.texts.remove(text)
-            send2trash.send2trash(file)
+            send2trash(file)
 
         props = context.window_manager.explorer_properties
         folder_view_list = props.folder_view_list

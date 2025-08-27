@@ -1,7 +1,7 @@
 from bpy.types import UILayout
 
 
-def new_extension_draw(self, context):
+def new_addon_draw(self, context):
     layout: UILayout = self.layout
 
     layout.separator()

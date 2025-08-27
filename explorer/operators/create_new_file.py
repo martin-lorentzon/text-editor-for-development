@@ -1,8 +1,8 @@
 from bpy.types import Operator
 from bpy.props import StringProperty
-from ..helpers import disable_on_empty_folder_path, require_valid_open_folder
 from ...helpers import uninitialized_preference
-from ..functions import refresh_folder_view, contextual_parent_folder, unique_path
+from ..helpers import disable_on_empty_folder_path, require_valid_open_folder, refresh_folder_view
+from ..functions import contextual_parent_folder, unique_path
 from ... import __package__ as base_package
 from pathlib import Path
 
@@ -10,7 +10,7 @@ from pathlib import Path
 @disable_on_empty_folder_path
 @require_valid_open_folder
 class EXPLORER_OT_create_new_file(Operator):
-    bl_idname = "text.create_new_file"
+    bl_idname = "wm.explorer_create_new_file"
     bl_label = "Create New File"
     bl_description = "Create a new file in the currently opened or active directory"
     bl_options = {"INTERNAL"}

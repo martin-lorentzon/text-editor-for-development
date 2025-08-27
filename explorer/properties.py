@@ -1,7 +1,17 @@
 import bpy
 from bpy.props import StringProperty, IntProperty, CollectionProperty
 from pathlib import Path
-from .functions import unique_path, refresh_folder_view, open_folder, file_path_at_index, text_at_index, text_at_file_path
+from .functions import (
+    unique_path, 
+    open_folder, 
+    file_path_at_index, 
+    text_at_index, 
+    text_at_file_path
+)
+from .helpers import refresh_folder_view
+
+
+INVALID_OPEN_FOLDER_MSG = "Failed to set property open_folder_path - {folder} is not a directory"
 
 
 # ——————————————————————————————————————————————————————————————————————
@@ -44,32 +54,29 @@ def get_folder_view_active_index(self):
 
 
 def set_folder_view_active_index(self, value):
-    self["folder_view_active_index"] = value
-
     folder_view_list = self.folder_view_list
-
     if len(folder_view_list) < 1:
         return
+    
+    self["folder_view_active_index"] = value
 
     def show_text(text):
         for area in bpy.context.screen.areas:
-            area: bpy.types.AreaSpaces
             if area.type == "TEXT_EDITOR":
                 area.spaces[0].text = text
 
-    file = file_path_at_index(value)
     text = text_at_index(value)
-
-    if text is not None:
-        show_text(text)
-    else:
+    if text is None:
+        file = file_path_at_index(value)
         try:
-            with open(str(file), "r") as f:
-                pass
+            # Test to see if we can open it as text
+            # The scope of this module doesn't stretch beyond files we can open in text
+            file.read_text()  
             text = bpy.data.texts.load(str(file))
-            show_text(text)
         except:
-            pass
+            return
+    
+    show_text(text)
 
 
 # Open folder path (GETTER/SETTER)
@@ -79,9 +86,10 @@ def get_open_folder_path(self):
 
 def set_open_folder_path(self, value):
     folder = Path(value)
-    if not folder.is_dir():
-        print(f"Failed to set property open_folder_path - {value} is not a directory")
+    if folder.is_dir() == False:
+        print(INVALID_OPEN_FOLDER_MSG.format(folder=value))
         return
+    
     open_folder(folder)
     refresh_folder_view(redraw_only=True)
     self["open_folder_path"] = value
@@ -110,7 +118,10 @@ class ExplorerProperties(bpy.types.PropertyGroup):
         get=get_open_folder_path,
         set=set_open_folder_path
     )
-    folder_view_list: CollectionProperty(type=FileItemProperties)
+    folder_view_list: CollectionProperty(
+        name="Folder View List",
+        type=FileItemProperties
+    )
     folder_view_active_index: IntProperty(
         name="Active File Index",
         get=get_folder_view_active_index,

@@ -1,10 +1,11 @@
 import bpy
+from .constants import EXTENSION_TO_ICON
 from .functions import text_at_file_path
-from bpy.types import UILayout, UIList, Panel
+from bpy.types import UILayout
 from pathlib import Path
 
 
-class EXPLORER_UL_folder_view_list(UIList):
+class EXPLORER_UL_folder_view_list(bpy.types.UIList):
     def filter_items(self, context, data, propname):
         helpers = bpy.types.UI_UL_list
 
@@ -19,24 +20,6 @@ class EXPLORER_UL_folder_view_list(UIList):
         layout.prop(self, "filter_name", text="", icon="VIEWZOOM")
 
     def draw_item(self, context, layout: UILayout, data, item, icon, active_data, active_propname):
-        extension_to_icon = {
-            ".py": "FILE_SCRIPT",
-            ".txt": "FILE_TEXT", ".json": "FILE_TEXT",
-            ".blend": "FILE_BLEND",
-            ".png": "FILE_IMAGE", ".jpg": "FILE_IMAGE", ".jpeg": "FILE_IMAGE",
-            ".tif": "FILE_IMAGE", ".tiff": "FILE_IMAGE", ".gif": "FILE_IMAGE",
-            ".webp": "FILE_IMAGE", ".svg": "FILE_IMAGE", ".bmp": "FILE_IMAGE", ".raw": "FILE_IMAGE",
-            ".mp4": "FILE_MOVIE", ".mov": "FILE_MOVIE", ".avi": "FILE_MOVIE", ".mkv": "FILE_MOVIE",
-            ".flv": "FILE_MOVIE", ".webm": "FILE_MOVIE", ".mpeg": "FILE_MOVIE", ".prores": "FILE_MOVIE",
-            ".obj": "FILE_3D", ".fbx": "FILE_3D", ".stl": "FILE_3D", ".gltf": "FILE_3D", ".glb": "FILE_3D",
-            ".usd": "FILE_3D", ".usda": "FILE_3D", ".usdc": "FILE_3D", ".usdz": "FILE_3D",
-            ".ply": "FILE_3D", ".abc": "FILE_3D", ".dae": "FILE_3D",
-            ".ttf": "FILE_FONT", ".otf": "FILE_FONT", ".dfont": "FILE_FONT", ".fon": "FILE_FONT", ".ttc": "FILE_FONT",
-            ".mp3": "FILE_SOUND", ".wav": "FILE_SOUND", ".flac": "FILE_SOUND", ".aac": "FILE_SOUND",
-            ".vdb": "FILE_VOLUME",
-            "": "FILE"
-        }
-
         expanded_folder_paths = context.window_manager.expanded_folder_paths
         is_active = item.creation_idx == active_data.folder_view_active_index
 
@@ -44,7 +27,7 @@ class EXPLORER_UL_folder_view_list(UIList):
         is_folder = file.is_dir()
         file_type = item.file_type
         
-        icon = extension_to_icon.get(file_type, "FILE")
+        icon = EXTENSION_TO_ICON.get(file_type, "FILE")
 
         text = text_at_file_path(file)
         is_unsaved = text is not None and text.is_dirty
@@ -82,33 +65,38 @@ class EXPLORER_UL_folder_view_list(UIList):
                 op.file_path = str(file)
 
 
-class EXPLORER_PT_explorer_panel(Panel):
+def template_explorer(layout: UILayout, context: bpy.types.Context):
+    props = context.window_manager.explorer_properties
+
+    folder = Path(props.open_folder_path)
+    folder_name = folder.name
+
+    header, panel = layout.panel("folder_view_subpanel")
+    row = header.row(align=True)
+    folder_text = folder_name if folder_name != "" else "Open Folder"
+    row.operator("wm.explorer_open_folder", text=folder_text)
+    row.operator("wm.explorer_create_new_file", text="", icon="FILE_NEW")
+    row.operator("wm.explorer_create_new_folder", text="", icon="NEWFOLDER")
+    row.operator_context = "INVOKE_DEFAULT"
+    row.operator("wm.explorer_refresh_folder_view", text="", icon="FILE_REFRESH")
+    row.operator("wm.explorer_collapse_folders", text="",
+                    icon="AREA_JOIN_LEFT" if bpy.app.version >= (4, 3, 0) else "AREA_JOIN")
+    if panel:
+        panel.template_list(
+            "EXPLORER_UL_folder_view_list",
+            "",
+            props, "folder_view_list",
+            props, "folder_view_active_index"
+        )
+
+
+class EXPLORER_PT_explorer_panel(bpy.types.Panel):
     bl_label = "Explorer"
     bl_space_type = "TEXT_EDITOR"
     bl_region_type = "UI"
     bl_category = "Dev"
 
     def draw(self, context):
-        props = context.window_manager.explorer_properties
         layout = self.layout
 
-        folder = Path(props.open_folder_path)
-        folder_name = folder.name
-
-        header, panel = layout.panel("folder_view_subpanel")
-        row = header.row(align=True)
-        folder_text = folder_name if folder_name != "" else "Open Folder"
-        row.operator("text.open_folder", text=folder_text)
-        row.operator("text.create_new_file", text="", icon="FILE_NEW")
-        row.operator("text.create_new_folder", text="", icon="NEWFOLDER")
-        row.operator_context = "INVOKE_DEFAULT"
-        row.operator("text.refresh_folder_view", text="", icon="FILE_REFRESH")
-        row.operator("text.collapse_folders", text="",
-                     icon="AREA_JOIN_LEFT" if bpy.app.version >= (4, 3, 0) else "AREA_JOIN")
-        if panel:
-            panel.template_list(
-                "EXPLORER_UL_folder_view_list",
-                "",
-                props, "folder_view_list",
-                props, "folder_view_active_index"
-            )
+        template_explorer(layout, context)

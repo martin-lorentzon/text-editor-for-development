@@ -3,7 +3,7 @@
 # Text Editor for Development (Blender Add-on)
 > *Text Editor enhancements for add-on development*
 
-> ❓ ***Is this a complete IDE?***  
+> ❓ **Is this a complete IDE?**  
 > No, we still recommend using a program such as VSCode for any serious add-on development  
 > This extension exists to improve the usability of Blender’s text editor—especially when starting out in Blender may be more feasible due to, for example, imposed time constraints
 

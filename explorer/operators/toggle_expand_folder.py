@@ -1,8 +1,7 @@
 from bpy.types import Operator
 from bpy.props import StringProperty
-from ..helpers import disable_on_empty_folder_path, require_valid_open_folder
-from ..functions import find_file_path_index, open_folder
-from pathlib import Path
+from ..helpers import disable_on_empty_folder_path, require_valid_open_folder, refresh_folder_view
+from ..functions import find_file_path_index
 
 
 @disable_on_empty_folder_path
@@ -26,5 +25,5 @@ class EXPLORER_OT_toggle_expand_folder(Operator):
         else:
             wm.expanded_folder_paths.add(self.folder_path)
 
-        open_folder(Path(props.open_folder_path), file_clicked_on=file_clicked_on)
+        refresh_folder_view(file_clicked_on=file_clicked_on)
         return {"FINISHED"}

@@ -52,7 +52,7 @@ class REMOTE_CONTENT_OT_clone_repository(Operator):
                 install_git_kwargs = dict(
                     title="Git is not installed",
                     icon="ERROR",
-                    message="Please install Git for cloning of remote repositories",
+                    message="Please install Git to clone remote repositories",
                     confirm_text="To Downloads"
                 )
                 return wm.invoke_confirm(self, event, **install_git_kwargs)
@@ -82,7 +82,8 @@ class REMOTE_CONTENT_OT_clone_repository(Operator):
         match result:
             case 0:
                 self.report({"INFO"}, message)
-                bpy.ops.text.open_folder(directory=self.directory)
+                if getattr(context.window_manager, "explorer_properties", None):
+                    bpy.ops.wm.explorer_open_folder(directory=self.directory)
                 return {"FINISHED"}
             case _:
                 self.report({"ERROR"}, message)

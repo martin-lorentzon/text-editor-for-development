@@ -5,19 +5,22 @@ from pathlib import Path
 
 
 def find_file_path_index(file_path: Path | str, default=0):
-    folder_view_list = bpy.context.window_manager.explorer_properties.folder_view_list
+    wm = bpy.context.window_manager
+    folder_view_list = wm.explorer_properties.folder_view_list
     return next((i for i, file in enumerate(folder_view_list) if file.file_path == str(file_path)), default)
 
 
 def file_path_at_index(index: int):
-    folder_view_list = bpy.context.window_manager.explorer_properties.folder_view_list
+    wm = bpy.context.window_manager
+    folder_view_list = wm.explorer_properties.folder_view_list
     if index >= len(folder_view_list):
         raise ValueError(f"[file_path_at_index] Index ({index}) out of range")
     return Path(folder_view_list[index].file_path)
 
 
 def text_at_index(index: int):
-    folder_view_list = bpy.context.window_manager.explorer_properties.folder_view_list
+    wm = bpy.context.window_manager
+    folder_view_list = wm.explorer_properties.folder_view_list
     if index >= len(folder_view_list):
         raise ValueError(f"[text_at_index] Index ({index}) out of range")
     texts = bpy.data.texts
@@ -27,14 +30,14 @@ def text_at_index(index: int):
 
 def text_at_file_path(file_path: Path | str):
     """
-    Exists because getting texts by their name isn't enough >> bpy.data.texts.get(file.name)
-    Files of different folders often share the same name, hence this is a safer approach and necessary.
+    Exists because getting texts by their name isn't enough -> bpy.data.texts.get(file.name)  
+    Files of different hierarchical levels often share the same name, __init__.py e.g, hence this is needed
     """
     texts = bpy.data.texts
     return next((t for t in texts if Path(t.filepath).resolve() == Path(file_path).resolve()), None)
 
 
-def restore_active_file_decorator(func):
+def restore_active_file(func):
     def wrapper(*args, **kwargs):
         context = bpy.context
         props = context.window_manager.explorer_properties
@@ -61,8 +64,15 @@ def restore_active_file_decorator(func):
     return wrapper
 
 
-@restore_active_file_decorator
+@restore_active_file
 def open_folder(folder_path: Path | str, creation_idx=0, depth=0, file_clicked_on=0):
+    """
+    **Low-level**  
+    Prefer higher level alternatives:  
+    WindowManager.explorer_properties.open_folder_path  
+    and  
+    refresh_folder_view()
+    """
     context = bpy.context
     wm = context.window_manager
     addon_prefs = context.preferences.addons[base_package].preferences
@@ -108,23 +118,6 @@ def open_folder(folder_path: Path | str, creation_idx=0, depth=0, file_clicked_o
         if item.file_path in expanded_folder_paths and file.is_dir():
             creation_idx = open_folder(file, creation_idx=creation_idx, depth=depth+1)
     return creation_idx  # Ensure index continuity
-
-
-def refresh_folder_view(new_file_path: Path | str | None = None, redraw_only: bool = False):
-    context = bpy.context
-    props = context.window_manager.explorer_properties
-
-    if not redraw_only:
-        open_folder(props.open_folder_path)
-
-    if new_file_path is not None:
-        props.folder_view_active_index = find_file_path_index(new_file_path)
-
-    for area in context.screen.areas:
-        if area.type == "TEXT_EDITOR":
-            for region in area.regions:
-                if region.type == "UI":
-                    region.tag_redraw()
 
 
 def contextual_parent_folder():

@@ -1,7 +1,7 @@
 import bpy
 from bpy.types import AddonPreferences
 from bpy.props import StringProperty, BoolProperty
-from .explorer.functions import refresh_folder_view
+from .explorer.helpers import refresh_folder_view
 from pathlib import Path
 
 

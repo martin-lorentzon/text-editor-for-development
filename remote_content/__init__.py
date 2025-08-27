@@ -28,11 +28,11 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    bpy.types.TEXT_MT_templates.append(ui.new_extension_draw)
+    bpy.types.TEXT_MT_templates.append(ui.new_addon_draw)
 
 
 def unregister():
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
 
-    bpy.types.TEXT_MT_templates.remove(ui.new_extension_draw)
+    bpy.types.TEXT_MT_templates.remove(ui.new_addon_draw)
