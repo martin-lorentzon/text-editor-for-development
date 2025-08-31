@@ -12,6 +12,7 @@ from .helpers import refresh_folder_view
 
 
 INVALID_OPEN_FOLDER_MSG = "Failed to set property open_folder_path - {folder} is not a directory"
+INVALID_ACTIVE_FILE_MSG = "Failed to set property file_name - {file} does not exist"
 
 
 # ——————————————————————————————————————————————————————————————————————
@@ -26,16 +27,24 @@ def get_file_name(self):
 
 def set_file_name(self, value):
     source = Path(self.file_path)
+
+    if source.exists() == False:
+        print(INVALID_ACTIVE_FILE_MSG.format(file=source))
+        refresh_folder_view()
+        return
+
     parent = source.parent
     destination: Path = parent / value
 
-    if str(destination) == self.file_path:  # Is true for when the file is first loaded
+    if str(destination) == self.file_path:
         self["file_name"] = value
-        return
+        return  # Avoids infinite loop when opening a folder
     
     text = text_at_file_path(source)
 
     if text:
+        if text.is_dirty:
+            source.write_text(text.as_string())  # Keeps unsaved progress when renaming
         bpy.data.texts.remove(text)
 
     unique_destination = unique_path(destination)
