@@ -49,7 +49,7 @@ class EXPLORER_UL_folder_view_list(bpy.types.UIList):
             layout.prop(item, "file_name", text="")
 
             if is_active:
-                op = layout.operator("text.delete_file", text="", icon="TRASH")
+                op = layout.operator("wm.explorer_delete_file", text="", icon="TRASH")
                 op.file_path = str(file)
         else:
             row = layout.row()
@@ -64,7 +64,7 @@ class EXPLORER_UL_folder_view_list(bpy.types.UIList):
                 sub.label(text="Unsaved")
 
             if is_active:
-                op = row.operator("text.delete_file", text="", icon="TRASH")
+                op = row.operator("wm.explorer_delete_file", text="", icon="TRASH")
                 op.file_path = str(file)
 
 

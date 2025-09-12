@@ -18,7 +18,7 @@ from send2trash import send2trash
 @require_valid_open_folder
 @require_valid_active_file
 class EXPLORER_OT_delete_file(Operator):
-    bl_idname = "text.delete_file"
+    bl_idname = "wm.explorer_delete_file"
     bl_label = "Delete File"
     bl_description = "Deletes the selected file"
     bl_options = {"INTERNAL"}
