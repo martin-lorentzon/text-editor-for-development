@@ -32,6 +32,9 @@ class EXPLORER_UL_folder_view_list(bpy.types.UIList):
         text = text_at_file_path(file)
         is_unsaved = text is not None and text.is_dirty
 
+        if text is not None:
+            layout.context_pointer_set("edit_text", text)
+
         layout.emboss = "NONE"
 
         for i in range(item.depth):
