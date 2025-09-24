@@ -1,7 +1,7 @@
 ![Featured Image](https://github.com/martin-lorentzon/text-editor-for-development/blob/main/images/featured_image_badge.png?raw=true)
 
-# Text Editor for Development (Blender Add-on)
-> *Text Editor enhancements for add-on development*
+# Text editor for Development (Blender Add-on)
+> *Text editor enhancements for add-on development*
 
 > ❓ **Is this a complete IDE?**  
 > No, we still recommend using a program such as VSCode for any serious add-on development  
@@ -40,6 +40,6 @@ Please report any problems around backward compatibility using [GitHub Issues](h
 | -------------------------------------------------- | ---------- | -------- |
 | VSCode-like folder view                            | ✅ Done     | –        |
 | Cloning of remote content (e.g., add-on templates) | ✅ Done     | –        |
-| BPY self-paced learning material                   | ⬜ Not Done | High     |
+| BPY self-paced learning material                   | ✅ First draft | High     |
 | Reuse of code snippets + Context menu redesign     | ⬜ Not Done | Low      |
 | ❔                                                 | ⬜ Not Done | –        |
