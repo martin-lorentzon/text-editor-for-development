@@ -20,6 +20,7 @@
 - Add-on Template: `Text Editor → Templates → New Add-on`  
 
 ## Preferences
+- **Comments Color**
 - **Default File Name:** The default name for new files  
 - **Default Folder Name:** The default name for new folders
 - **Show Hidden Items:** Shows hidden items in the folder view
