@@ -3,9 +3,9 @@ schema_version = "1.0.0"
 # Example of manifest file for a Blender extension
 # Change the values according to your extension
 id = "text_editor_for_development"
-version = "1.0.3"
-name = "Text Editor for Development"
-tagline = "Text Editor enhancements for add-on development"
+version = "1.0.4"
+name = "Text editor for Development"
+tagline = "Text editor enhancements for add-on development"
 maintainer = "Martin Lorentzon <mtlorentzon@proton.me>"
 # Supported types: "add-on", "theme"
 type = "add-on"

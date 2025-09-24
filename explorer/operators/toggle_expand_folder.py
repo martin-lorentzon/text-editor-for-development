@@ -16,7 +16,6 @@ class EXPLORER_OT_toggle_expand_folder(Operator):
 
     def execute(self, context):
         wm = context.window_manager
-        props = wm.explorer_properties
         
         file_clicked_on = find_file_path_index(self.folder_path, 0)
 

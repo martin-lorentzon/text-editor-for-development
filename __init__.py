@@ -1,8 +1,8 @@
 bl_info = {
-    "name": "Text Editor for Development",
-    "description": "Text Editor enhancements for add-on development",
+    "name": "Text editor for Development",
+    "description": "Text editor enhancements for add-on development",
     "author": "Martin Lorentzon",
-    "version": (1, 0, 3),
+    "version": (1, 0, 4),
     "blender": (4, 5, 0),
     "location": "Text Editor > Sidebar > Dev",
     "doc_url": "https://github.com/martin-lorentzon/text-editor-for-development",
@@ -22,10 +22,12 @@ bl_info = {
 if "bpy" in locals():
     from importlib import reload
 
+    reload(constants)
     reload(addon_preferences)
     reload(explorer)
     reload(remote_content)
 else:
+    from . import constants
     from . import addon_preferences
     from . import explorer
     from . import remote_content

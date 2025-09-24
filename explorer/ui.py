@@ -30,6 +30,7 @@ class EXPLORER_UL_folder_view_list(bpy.types.UIList):
         icon = EXTENSION_TO_ICON.get(file_type, "FILE")
 
         text = text_at_file_path(file)
+        is_modified = text is not None and text.is_modified
         is_unsaved = text is not None and text.is_dirty
 
         if text is not None:
@@ -55,7 +56,18 @@ class EXPLORER_UL_folder_view_list(bpy.types.UIList):
             row = layout.row()
             row.prop(item, "file_name", text="", icon=icon)
 
-            if is_unsaved:
+            if is_modified:
+                if is_active:
+                    row.operator("text.save", text="", icon="FILE_TICK")
+                    row.operator_context = "EXEC_DEFAULT"
+                    op = row.operator("text.resolve_conflict", text="", icon="FILE_REFRESH")
+                    op.resolution = "RELOAD"
+                    row.operator_context = "INVOKE_DEFAULT"
+                sub = row.row()
+                sub.alignment = "RIGHT"
+                sub.alert = True
+                sub.label(text="External edits")
+            elif is_unsaved:
                 if is_active:
                     row.operator("text.save", text="", icon="FILE_TICK")
                 sub = row.row()
@@ -80,7 +92,7 @@ def template_explorer(layout: UILayout, context: bpy.types.Context):
     row.operator("wm.explorer_open_folder", text=folder_text)
     row.operator("wm.explorer_create_new_file", text="", icon="FILE_NEW")
     row.operator("wm.explorer_create_new_folder", text="", icon="NEWFOLDER")
-    row.operator_context = "INVOKE_DEFAULT"
+    row.operator_context = "INVOKE_DEFAULT"  # TODO: Why did I do this? Neither operators below use invoke methods X.X
     row.operator("wm.explorer_refresh_folder_view", text="", icon="FILE_REFRESH")
     row.operator("wm.explorer_collapse_folders", text="",
                     icon="AREA_JOIN_LEFT" if bpy.app.version >= (4, 3, 0) else "AREA_JOIN")

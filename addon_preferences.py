@@ -1,8 +1,9 @@
 import bpy
 from bpy.types import AddonPreferences
-from bpy.props import StringProperty, BoolProperty
+from bpy.props import StringProperty, BoolProperty, EnumProperty
 from .explorer.helpers import refresh_folder_view
 from pathlib import Path
+from . import constants
 
 
 class TextEditorForDevelopmentPreferences(AddonPreferences):
@@ -45,17 +46,45 @@ class TextEditorForDevelopmentPreferences(AddonPreferences):
         default=True
     )
 
+    def get_comments_color(self):
+        return self.get("comments_color", "BLENDER_DEFAULT")
+    
+    def set_comments_color(self, value):
+        self["comments_color"] = value
+        enum_prop = self.bl_rna.properties["comments_color"]
+        color = constants.COMMENTS_COLORS[enum_prop.enum_items[value].identifier]
+        bpy.context.preferences.themes[0].text_editor.syntax_comment = color
+
+    comments_color: EnumProperty(
+        name="Comments Color",
+        items=[
+            ("BLENDER_DEFAULT", "Blender Default (Gray)", ""),
+            ("VSCODE",          "VSCode (Dark Green)",    ""),
+            ("LIGHT_GREEN",     "Light Green",            "")
+        ],
+        default="BLENDER_DEFAULT",
+        get=get_comments_color,
+        set=set_comments_color
+    )
+
     def draw(self, context):
         layout = self.layout
         layout.use_property_split = True
 
-        header, panel = layout.panel("explorer_prefs", default_closed=False)
-        header.label(text="Explorer")
-        if panel:
-            panel.prop(self, "default_new_file_name")
-            panel.prop(self, "default_new_folder_name")
-            panel.prop(self, "show_hidden_items")
-            panel.prop(self, "unlink_on_file_deletion")
+        text_edit_header, text_editor_panel = layout.panel("text_editor_prefs", default_closed=False)
+        text_edit_header.label(text="Text editor")
+
+        if text_editor_panel:
+            text_editor_panel.prop(self, "comments_color")
+
+            explorer_header, explorer_panel = layout.panel("explorer_prefs", default_closed=False)
+            explorer_header.label(text="Explorer")
+
+            if explorer_panel:
+                explorer_panel.prop(self, "default_new_file_name")
+                explorer_panel.prop(self, "default_new_folder_name")
+                explorer_panel.prop(self, "show_hidden_items")
+                explorer_panel.prop(self, "unlink_on_file_deletion")
 
 
 # ——————————————————————————————————————————————————————————————————————
