@@ -11,10 +11,12 @@
 
 ## Features
 - VSCode-style folder-view/explorer
+- Clone [learning material](https://github.com/martin-lorentzon/learn-bpy) to a local directory
 - Clone [multi-file add-on template](https://github.com/martin-lorentzon/clean-blender-addon-template) to a local directory
 
 ## Usage
-- Explorer: `Text Editor → Sidebar → Dev → Explorer`  
+- Explorer: `Text Editor → Sidebar → Dev → Explorer`
+- Learing Material: `Text Editor → Templates → Learning Material`  
 - Add-on Template: `Text Editor → Templates → New Add-on`  
 
 ## Preferences
