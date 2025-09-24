@@ -9,22 +9,26 @@ from . import constants
 class TextEditorForDevelopmentPreferences(AddonPreferences):
     bl_idname = __package__
 
+    def update_default_new_file_name(self, context):
+        sanitized = str(Path(self.default_new_file_name).name)
+        if self.default_new_file_name != sanitized:
+            self.default_new_file_name = sanitized
+
     default_new_file_name: StringProperty(
         name="Default File Name",
-        default="new_script.py"
+        default="new_script.py",
+        update=update_default_new_file_name
     )
 
-    def get_default_folder_name(self):
-        return self.get("default_new_folder_name", "")
-    
-    def set_default_folder_name(self, value):
-        self["default_new_folder_name"] = str(Path(value).with_suffix(""))
+    def update_default_new_folder_name(self, context):
+        sanitized = str(Path(self.default_new_folder_name).stem)
+        if self.default_new_folder_name != sanitized:
+            self.default_new_folder_name = sanitized
 
     default_new_folder_name: StringProperty(
         name="Default Folder Name",
         default="new_folder",
-        get=get_default_folder_name,
-        set=set_default_folder_name
+        update=update_default_new_folder_name
     )
 
     def get_show_hidden_items(self):
