@@ -43,5 +43,6 @@ Please report any problems around backward compatibility using [GitHub Issues](h
 | VSCode-like folder view                            | ✅ Done     | –        |
 | Cloning of remote content (e.g., add-on templates) | ✅ Done     | –        |
 | BPY self-paced learning material                   | ✅ First version | -     |
+| Utility buttons for printing possible node/menu types     | ⬜ Not Done | Low-Medium      |
 | Reuse of code snippets + Context menu redesign     | ⬜ Not Done | Low      |
 | ❔                                                 | ⬜ Not Done | –        |
