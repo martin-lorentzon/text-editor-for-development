@@ -31,7 +31,7 @@
     (This can be accomplished during the installation of Git)
 
 ## Compatibility
-The extension has been tested using Blender 4.5.1 LTS  
+The extension has been tested using Blender 4.2  
 Please report any problems around backward compatibility using [GitHub Issues](https://github.com/martin-lorentzon/text-editor-for-development/issues), same link as above
 
 ## Permissions
