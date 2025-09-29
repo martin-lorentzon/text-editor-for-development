@@ -29,7 +29,7 @@ class EXPLORER_UL_folder_view_list(bpy.types.UIList):
         
         icon = EXTENSION_TO_ICON.get(file_type, "FILE")
 
-        text = text_at_file_path(file)
+        text = item.text_ref
         is_modified = text is not None and text.is_modified
         is_unsaved = text is not None and text.is_dirty
 

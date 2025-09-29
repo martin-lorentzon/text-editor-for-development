@@ -5,12 +5,14 @@ from pathlib import Path
 
 
 def find_file_path_index(file_path: Path | str, default=0):
+    """**Warning: Expensive | Some of these should likely be phased out**"""
     wm = bpy.context.window_manager
     folder_view_list = wm.explorer_properties.folder_view_list
     return next((i for i, file in enumerate(folder_view_list) if file.file_path == str(file_path)), default)
 
 
 def file_path_at_index(index: int):
+    """**Warning: Expensive | Some of these should likely be phased out**"""
     wm = bpy.context.window_manager
     folder_view_list = wm.explorer_properties.folder_view_list
     if index >= len(folder_view_list):
@@ -19,6 +21,7 @@ def file_path_at_index(index: int):
 
 
 def text_at_index(index: int):
+    """**Warning: Expensive | Some of these should likely be phased out**"""
     wm = bpy.context.window_manager
     folder_view_list = wm.explorer_properties.folder_view_list
     if index >= len(folder_view_list):
@@ -31,7 +34,8 @@ def text_at_index(index: int):
 def text_at_file_path(file_path: Path | str):
     """
     Exists because getting texts by their name isn't enough -> bpy.data.texts.get(file.name)  
-    Files of different hierarchical levels often share the same name, __init__.py e.g, hence this is needed
+    Files of different hierarchical levels often share the same name, __init__.py e.g, hence this is needed  
+    **Warning: Expensive | Some of these should likely be phased out**
     """
     texts = bpy.data.texts
     return next((t for t in texts if Path(t.filepath).resolve() == Path(file_path).resolve()), None)
@@ -113,6 +117,7 @@ def open_folder(folder_path: Path | str, creation_idx=0, depth=0, file_clicked_o
         item.name = file.name
         item.depth = depth
         item.creation_idx = creation_idx
+        item.text_ref = text_at_file_path(item.file_path)
         creation_idx += 1
 
         if item.file_path in expanded_folder_paths and file.is_dir():

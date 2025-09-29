@@ -1,11 +1,9 @@
 import bpy
-from bpy.props import StringProperty, IntProperty, CollectionProperty
+from bpy.props import StringProperty, IntProperty, CollectionProperty, PointerProperty
 from pathlib import Path
 from .functions import (
     unique_path, 
     open_folder, 
-    file_path_at_index, 
-    text_at_index, 
     text_at_file_path
 )
 from .helpers import refresh_folder_view
@@ -74,14 +72,18 @@ def set_folder_view_active_index(self, value):
             if area.type == "TEXT_EDITOR":
                 area.spaces[0].text = text
 
-    text = text_at_index(value)
+    item = folder_view_list[value]  # Get the item
+    item.text_ref = text_at_file_path(item.file_path)  # Update its text reference
+    text = item.text_ref
+
     if text is None:
-        file = file_path_at_index(value)
+        file = Path(item.file_path)
         try:
             # Test to see if we can open it as text
             # The scope of this module doesn't stretch beyond files we can open in text
             file.read_text()  
             text = bpy.data.texts.load(str(file))
+            item.text_ref = text
         except:
             return
     
@@ -119,6 +121,7 @@ class FileItemProperties(bpy.types.PropertyGroup):
     file_type: StringProperty(name="File Type")
     creation_idx: IntProperty()
     depth: IntProperty()
+    text_ref: PointerProperty(type=bpy.types.Text)
 
 
 class ExplorerProperties(bpy.types.PropertyGroup):
