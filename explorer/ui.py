@@ -23,8 +23,7 @@ class EXPLORER_UL_folder_view_list(bpy.types.UIList):
         expanded_folder_paths = context.window_manager.expanded_folder_paths
         is_active = item.creation_idx == active_data.folder_view_active_index
 
-        file = Path(item.file_path)
-        is_folder = file.is_dir()
+        is_folder = item.is_dir
         file_type = item.file_type
         
         icon = EXTENSION_TO_ICON.get(file_type, "FILE")
@@ -43,15 +42,15 @@ class EXPLORER_UL_folder_view_list(bpy.types.UIList):
             spacer.ui_units_x = 1
 
         if is_folder:
-            icon = "DOWNARROW_HLT" if str(file) in expanded_folder_paths else "RIGHTARROW"
+            icon = "DOWNARROW_HLT" if item.file_path in expanded_folder_paths else "RIGHTARROW"
             op = layout.operator("text.toggle_expand_folder", text="", icon=icon)
-            op.folder_path = str(file)
+            op.folder_path = item.file_path
 
             layout.prop(item, "file_name", text="")
 
             if is_active:
                 op = layout.operator("wm.explorer_delete_file", text="", icon="TRASH")
-                op.file_path = str(file)
+                op.file_path = item.file_path
         else:
             row = layout.row()
             row.prop(item, "file_name", text="", icon=icon)
@@ -77,7 +76,7 @@ class EXPLORER_UL_folder_view_list(bpy.types.UIList):
 
             if is_active:
                 op = row.operator("wm.explorer_delete_file", text="", icon="TRASH")
-                op.file_path = str(file)
+                op.file_path = item.file_path
 
 
 def template_explorer(layout: UILayout, context: bpy.types.Context):

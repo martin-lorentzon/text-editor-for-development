@@ -1,5 +1,5 @@
 import bpy
-from bpy.props import StringProperty, IntProperty, CollectionProperty, PointerProperty
+from bpy.props import StringProperty, IntProperty, CollectionProperty, PointerProperty, BoolProperty
 from pathlib import Path
 from .functions import (
     unique_path, 
@@ -119,9 +119,10 @@ class FileItemProperties(bpy.types.PropertyGroup):
         set=set_file_name
     )
     file_type: StringProperty(name="File Type")
-    creation_idx: IntProperty()
-    depth: IntProperty()
-    text_ref: PointerProperty(type=bpy.types.Text)
+    creation_idx: IntProperty(name="Creation Index")
+    depth: IntProperty(name="Depth")
+    text_ref: PointerProperty(type=bpy.types.Text, name="Text Reference")
+    is_dir: BoolProperty(name="Is Directory")
 
 
 class ExplorerProperties(bpy.types.PropertyGroup):

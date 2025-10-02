@@ -97,17 +97,20 @@ def open_folder(folder_path: Path | str, creation_idx=0, depth=0, file_clicked_o
     if creation_idx == 0:
         props.folder_view_list.clear()
 
+    files = [(f, f.is_dir()) for f in Path(folder_path).iterdir()]  # Gives us tuples -> (Path, Is a directory?)
+                                                                    # we want to check this only once - for performance
+
     files = sorted(
-        Path(folder_path).iterdir(),
+        files,
         key=lambda f: (
-            not f.is_dir(),  # Folders first
-            f.name.lower()   # Then sort by name
+            not f[1],           # Folders first
+            f[0].name.lower()   # Then sort by name
         )
     )
 
     show_hidden_items = uninitialized_preference(addon_prefs, "show_hidden_items")
 
-    for file in files:
+    for file, is_a_directory in files:
         if file.name.startswith(".") and not show_hidden_items:
             continue
         item = props.folder_view_list.add()
@@ -118,6 +121,7 @@ def open_folder(folder_path: Path | str, creation_idx=0, depth=0, file_clicked_o
         item.depth = depth
         item.creation_idx = creation_idx
         item.text_ref = text_at_file_path(item.file_path)
+        item.is_dir = is_a_directory
         creation_idx += 1
 
         if item.file_path in expanded_folder_paths and file.is_dir():

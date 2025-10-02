@@ -2,7 +2,7 @@ bl_info = {
     "name": "Text editor for Development",
     "description": "Text editor enhancements for add-on development",
     "author": "Martin Lorentzon",
-    "version": (1, 0, 5),
+    "version": (1, 0, 6),
     "blender": (4, 2, 0),
     "location": "Text Editor > Sidebar > Dev",
     "doc_url": "https://github.com/martin-lorentzon/text-editor-for-development",
