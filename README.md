@@ -39,11 +39,13 @@ Please report any problems around backward compatibility using [GitHub Issues](h
 - **Files:** Open folder for viewing/editing/renaming/sending files to trash
 
 ## Roadmap
-| Feature                                            | Status     | Priority |
-| -------------------------------------------------- | ---------- | -------- |
+| Feature                                            | Status      | Priority |
+| -------------------------------------------------- | ----------  | -------  |
 | VSCode-like folder view                            | ✅ Done     | –        |
 | Cloning of remote content (e.g., add-on templates) | ✅ Done     | –        |
-| BPY self-paced learning material                   | ✅ First version | -     |
-| Utility buttons for printing possible node/menu types     | ⬜ Not Done | Low-Medium      |
-| Reuse of code snippets + Context menu redesign     | ⬜ Not Done | Low      |
-| ❔                                                 | ⬜ Not Done | –        |
+| Self-paced BPY learning material                   | ✅ First version | -   |
+| Automated install of Python wheels                 | ⬜ Not Done | Medium   |
+| Reuse of code snippets + context menu redesign     | ⬜ Not Done | Low      |
+| Utility for searching possible node/menu types     | ⬜ Not Done | Low      |
+| SLM / AI-assisted scripting                        | ⬜ Not Done | Low      |
+| ?                                                  | ⬜ Not Done | –        |
