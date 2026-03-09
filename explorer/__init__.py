@@ -40,24 +40,22 @@ import bpy
 # ——————————————————————————————————————————————————————————————————————
 
 
-classes = [
-    properties.FileItemProperties,
-    properties.ExplorerProperties,
-    ui.EXPLORER_UL_folder_view_list,
-    ui.EXPLORER_PT_explorer_panel,
-    open_folder.EXPLORER_OT_open_folder,
-    refresh_folder_view.EXPLORER_OT_refresh_folder_view,
-    create_new_file.EXPLORER_OT_create_new_file,
-    create_new_folder.EXPLORER_OT_create_new_folder,
-    toggle_expand_folder.EXPLORER_OT_toggle_expand_folder,
-    collapse_folders.EXPLORER_OT_collapse_folders,
-    delete_file.EXPLORER_OT_delete_file
+modules = [
+    properties,
+    ui,
+    open_folder,
+    refresh_folder_view,
+    create_new_file,
+    create_new_folder,
+    toggle_expand_folder,
+    collapse_folders,
+    delete_file,
 ]
 
 
 def register():
-    for cls in classes:
-        bpy.utils.register_class(cls)
+    for module in modules:
+        module.register()
 
     bpy.types.WindowManager.explorer_properties = bpy.props.PointerProperty(
         type=properties.ExplorerProperties,
@@ -68,8 +66,8 @@ def register():
 
 
 def unregister():
-    for cls in reversed(classes):
-        bpy.utils.unregister_class(cls)
+    for module in reversed(modules):
+        module.unregister()
 
     del bpy.types.WindowManager.explorer_properties
     del bpy.types.WindowManager.expanded_folder_paths
