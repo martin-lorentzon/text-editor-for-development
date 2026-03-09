@@ -1,23 +1,21 @@
 import bpy
-from bpy.types import Operator
 from bpy.props import StringProperty
-from ...helpers import uninitialized_preference
-from ..helpers import (
-    disable_on_empty_folder_path, 
-    require_valid_open_folder, 
-    require_valid_active_file, 
-    refresh_folder_view
-    )
-from ..functions import text_at_file_path
-from ... import __package__ as base_package
 from pathlib import Path
+from ..helpers import (
+    disable_on_empty_folder_path,
+    require_valid_open_folder,
+    require_valid_active_file,
+    refresh_folder_view
+)
+from ..functions import text_at_file_path
 from send2trash import send2trash
+from ... import __package__ as base_package
 
 
 @disable_on_empty_folder_path
 @require_valid_open_folder
 @require_valid_active_file
-class EXPLORER_OT_delete_file(Operator):
+class EXPLORER_OT_delete_file(bpy.types.Operator):
     bl_idname = "wm.explorer_delete_file"
     bl_label = "Delete File"
     bl_description = "Deletes the selected file"
@@ -59,11 +57,11 @@ class EXPLORER_OT_delete_file(Operator):
                         bpy.data.texts.remove(text)
 
         if is_folder:
-            if uninitialized_preference(addon_prefs, "unlink_on_file_deletion"):
+            if addon_prefs.unlink_on_file_deletion:
                 unlink_contents_recursive(file)
             send2trash(file)
         else:
-            if uninitialized_preference(addon_prefs, "unlink_on_file_deletion"):
+            if addon_prefs.unlink_on_file_deletion:
                 text = text_at_file_path(file)
                 if text is not None:
                     bpy.data.texts.remove(text)
@@ -79,3 +77,11 @@ class EXPLORER_OT_delete_file(Operator):
         new_active_idx = min(active_idx, len(folder_view_list) - 1)
         props.folder_view_active_index = new_active_idx
         return {"FINISHED"}
+
+
+# ——————————————————————————————————————————————————————————————————————
+# MARK: REGISTRATION
+# ——————————————————————————————————————————————————————————————————————
+
+
+register, unregister = bpy.utils.register_classes_factory((EXPLORER_OT_delete_file,))

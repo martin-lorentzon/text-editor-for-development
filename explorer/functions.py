@@ -1,7 +1,6 @@
 import bpy
-from ..helpers import uninitialized_preference
-from .. import __package__ as base_package
 from pathlib import Path
+from .. import __package__ as base_package
 
 
 def find_file_path_index(file_path: Path | str, default=0):
@@ -97,8 +96,9 @@ def open_folder(folder_path: Path | str, creation_idx=0, depth=0, file_clicked_o
     if creation_idx == 0:
         props.folder_view_list.clear()
 
-    files = [(f, f.is_dir()) for f in Path(folder_path).iterdir()]  # Gives us tuples -> (Path, Is a directory?)
-                                                                    # we want to check this only once - for performance
+    # Gives us tuples -> (Path, Is a directory?)
+    files = [(f, f.is_dir()) for f in Path(folder_path).iterdir()]
+    # we want to check this only once - for performance
 
     files = sorted(
         files,
@@ -108,10 +108,10 @@ def open_folder(folder_path: Path | str, creation_idx=0, depth=0, file_clicked_o
         )
     )
 
-    show_hidden_items = uninitialized_preference(addon_prefs, "show_hidden_items")
+    internal_show_hidden_items = addon_prefs.internal_show_hidden_items
 
     for file, is_a_directory in files:
-        if file.name.startswith(".") and not show_hidden_items:
+        if file.name.startswith(".") and not internal_show_hidden_items:
             continue
         item = props.folder_view_list.add()
         item.file_path = str(file)
@@ -141,7 +141,8 @@ def contextual_parent_folder():
 
     active_idx = props.folder_view_active_index
 
-    if not 0 <= active_idx < len(folder_view_list):  # Return the open folder if the active index is invalid
+    # Return the open folder if the active index is invalid
+    if not 0 <= active_idx < len(folder_view_list):
         return Path(props.open_folder_path)
 
     active_item = props.folder_view_list[active_idx]

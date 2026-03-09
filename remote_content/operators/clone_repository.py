@@ -1,5 +1,4 @@
 import bpy
-from bpy.types import Operator
 from bpy.props import StringProperty
 from ..functions import GIT_NOT_FOUND_MSG, is_git_installed, clone_git_repo
 import webbrowser
@@ -8,7 +7,7 @@ import webbrowser
 ONLINE_ACCESS_MSG = "Online Access is required for cloning of remote repositories"
 
 
-class REMOTE_CONTENT_OT_clone_repository(Operator):
+class REMOTE_CONTENT_OT_clone_repository(bpy.types.Operator):
     bl_idname = "wm.clone_repository"
     bl_label = "Clone Repository"
     bl_description = "Clone a remote repository to the specified local directory path"
@@ -42,13 +41,14 @@ class REMOTE_CONTENT_OT_clone_repository(Operator):
 
         match result:
             case 0:
-                clone_dialog_kwargs = dict(title=self.title, confirm_text=self.confirm_text) if v4_1_0 else {}
+                clone_dialog_kwargs = dict(
+                    title=self.title, confirm_text=self.confirm_text) if v4_1_0 else {}
                 return wm.invoke_props_dialog(self, **clone_dialog_kwargs)
             case 2:
                 if not v4_1_0:
                     self.report({"ERROR"}, GIT_NOT_FOUND_MSG)
                     return {"CANCELLED"}
-                
+
                 install_git_kwargs = dict(
                     title="Git is not installed",
                     icon="ERROR",
@@ -59,7 +59,6 @@ class REMOTE_CONTENT_OT_clone_repository(Operator):
             case _:
                 self.report({"ERROR"}, message)
                 return {"CANCELLED"}
-
 
     def execute(self, context):
         if not bpy.app.online_access:  # Second check needed in case the operator is called from script
@@ -92,7 +91,8 @@ class REMOTE_CONTENT_OT_clone_repository(Operator):
     def draw(self, context):
         layout = self.layout
 
-        op = layout.operator("wm.url_open", text=f"Source: {self.repository_url}", icon="INTERNET", emboss=False)
+        op = layout.operator(
+            "wm.url_open", text=f"Source: {self.repository_url}", icon="INTERNET", emboss=False)
         op.url = self.repository_url
 
         layout.separator()
@@ -105,3 +105,11 @@ class REMOTE_CONTENT_OT_clone_repository(Operator):
             col.label(text=self.directory)
         else:
             layout.separator()
+
+
+# ——————————————————————————————————————————————————————————————————————
+# MARK: REGISTRATION
+# ——————————————————————————————————————————————————————————————————————
+
+
+register, unregister = bpy.utils.register_classes_factory((REMOTE_CONTENT_OT_clone_repository,))

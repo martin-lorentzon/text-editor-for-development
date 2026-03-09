@@ -4,7 +4,7 @@ bl_info = {
     "author": "Martin Lorentzon",
     "version": (1, 0, 6),
     "blender": (4, 2, 0),
-    "location": "Text Editor > Sidebar > Dev",
+    "location": "Text Editor > Templates & Sidebar",
     "doc_url": "https://github.com/martin-lorentzon/text-editor-for-development",
     "tracker_url": "https://github.com/martin-lorentzon/text-editor-for-development/issues",
     # "warning": "",

@@ -19,20 +19,20 @@ import bpy
 # ——————————————————————————————————————————————————————————————————————
 
 
-classes = [
-    clone_repository.REMOTE_CONTENT_OT_clone_repository
+modules = [
+    clone_repository,
 ]
 
 
 def register():
-    for cls in classes:
-        bpy.utils.register_class(cls)
+    for module in modules:
+        module.register()
 
-    bpy.types.TEXT_MT_templates.append(ui.new_addon_draw)
+    bpy.types.TEXT_MT_templates.append(ui.draw_func)
 
 
 def unregister():
-    for cls in reversed(classes):
-        bpy.utils.unregister_class(cls)
+    for module in reversed(modules):
+        module.unregister()
 
-    bpy.types.TEXT_MT_templates.remove(ui.new_addon_draw)
+    bpy.types.TEXT_MT_templates.remove(ui.draw_func)
