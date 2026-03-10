@@ -44,8 +44,10 @@ Please report any problems around backward compatibility using [GitHub Issues](h
 | VSCode-like folder view                            | ✅ Done     | –        |
 | Cloning of remote content (e.g., add-on templates) | ✅ Done     | –        |
 | Self-paced BPY learning material                   | ✅ First version | -   |
-| Automated install of Python wheels                 | ⬜ Not Done | Medium   |
+| Automated install of ones add-on projects          | ⬜ Not Done | Medium   |
+| Automated install of Python wheels for testing     | ⬜ Not Done | Medium   |
 | Reuse of code snippets + context menu redesign     | ⬜ Not Done | Low      |
-| Utility for searching possible node/menu types     | ⬜ Not Done | Low      |
+| Search utility for possible node/menu types        | ⬜ Not Done | Low      |
+| Move learning material to marimo (or another notebook interface) | ⬜ Not Done | Low |
 | SLM / AI-assisted scripting                        | ⬜ Not Done | Low      |
 | ?                                                  | ⬜ Not Done | –        |
