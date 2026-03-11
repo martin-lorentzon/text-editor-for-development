@@ -15,7 +15,7 @@
 - Clone [multi-file add-on template](https://github.com/martin-lorentzon/clean-blender-addon-template) to a local directory
 
 ## Usage
-- Explorer: `Text Editor → Sidebar → Dev → Explorer`
+- Explorer: `Text Editor → Sidebar → Explorer`
 - Learing Material: `Text Editor → Templates → Learning Material`  
 - Add-on Template: `Text Editor → Templates → New Add-on`  
 
@@ -32,7 +32,7 @@
     (This can be accomplished during the installation of Git)
 
 ## Compatibility
-The extension has been tested using Blender 4.2  
+The extension has been tested using Blender 5.1 beta  
 Please report any problems around backward compatibility using [GitHub Issues](https://github.com/martin-lorentzon/text-editor-for-development/issues), same link as above
 
 ## Permissions
