@@ -1,10 +1,10 @@
-from bpy.types import Operator
+import bpy
 from bpy.props import StringProperty, BoolProperty
-from ..properties import INVALID_OPEN_FOLDER_MSG
 from pathlib import Path
+from ..properties import INVALID_OPEN_FOLDER_MSG
 
 
-class EXPLORER_OT_open_folder(Operator):
+class EXPLORER_OT_open_folder(bpy.types.Operator):
     bl_idname = "wm.explorer_open_folder"
     bl_label = "Open Folder"
     bl_description = "Quickly search all files in the current folder"
@@ -38,3 +38,11 @@ class EXPLORER_OT_open_folder(Operator):
         wm.expanded_folder_paths.clear()
         props.open_folder_path = self.directory
         return {"FINISHED"}
+
+
+# ——————————————————————————————————————————————————————————————————————
+# MARK: REGISTRATION
+# ——————————————————————————————————————————————————————————————————————
+
+
+register, unregister = bpy.utils.register_classes_factory((EXPLORER_OT_open_folder,))

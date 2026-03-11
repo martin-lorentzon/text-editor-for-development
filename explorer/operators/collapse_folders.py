@@ -1,10 +1,10 @@
-from bpy.types import Operator
+import bpy
 from ..helpers import disable_on_empty_folder_path, require_valid_open_folder, refresh_folder_view
 
 
 @disable_on_empty_folder_path
 @require_valid_open_folder
-class EXPLORER_OT_collapse_folders(Operator):
+class EXPLORER_OT_collapse_folders(bpy.types.Operator):
     bl_idname = "wm.explorer_collapse_folders"
     bl_label = "Collapse Folders in Explorer"
     bl_description = "Display only the top-level contents of the opened folder"
@@ -20,3 +20,11 @@ class EXPLORER_OT_collapse_folders(Operator):
         wm.expanded_folder_paths.clear()
         refresh_folder_view()
         return {"FINISHED"}
+
+
+# ——————————————————————————————————————————————————————————————————————
+# MARK: REGISTRATION
+# ——————————————————————————————————————————————————————————————————————
+
+
+register, unregister = bpy.utils.register_classes_factory((EXPLORER_OT_collapse_folders,))

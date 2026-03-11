@@ -2,8 +2,8 @@ import bpy
 from bpy.props import StringProperty, IntProperty, CollectionProperty, PointerProperty, BoolProperty
 from pathlib import Path
 from .functions import (
-    unique_path, 
-    open_folder, 
+    unique_path,
+    open_folder,
     text_at_file_path
 )
 from .helpers import refresh_folder_view
@@ -37,7 +37,7 @@ def set_file_name(self, value):
     if str(destination) == self.file_path:
         self["file_name"] = value
         return  # Avoids infinite loop when opening a folder
-    
+
     text = text_at_file_path(source)
 
     if text:
@@ -64,13 +64,14 @@ def set_folder_view_active_index(self, value):
     folder_view_list = self.folder_view_list
     if len(folder_view_list) < 1:
         return
-    
+
     self["folder_view_active_index"] = value
 
     def show_text(text):
         for area in bpy.context.screen.areas:
             if area.type == "TEXT_EDITOR":
                 area.spaces[0].text = text
+                break
 
     item = folder_view_list[value]  # Get the item
     item.text_ref = text_at_file_path(item.file_path)  # Update its text reference
@@ -81,18 +82,18 @@ def set_folder_view_active_index(self, value):
         try:
             # Test to see if we can open it as text
             # The scope of this module doesn't stretch beyond files we can open in text
-            file.read_text()  
+            file.read_text()
             text = bpy.data.texts.load(str(file))
             item.text_ref = text
         except:
             return
-    
+
     show_text(text)
 
 
 # Open folder path (GETTER/SETTER)
 def get_open_folder_path(self):
-        return self.get("open_folder_path", "")
+    return self.get("open_folder_path", "")
 
 
 def set_open_folder_path(self, value):
@@ -100,7 +101,7 @@ def set_open_folder_path(self, value):
     if folder.is_dir() == False:
         print(INVALID_OPEN_FOLDER_MSG.format(folder=value))
         return
-    
+
     open_folder(folder)
     refresh_folder_view(redraw_only=True)
     self["open_folder_path"] = value
@@ -140,3 +141,11 @@ class ExplorerProperties(bpy.types.PropertyGroup):
         get=get_folder_view_active_index,
         set=set_folder_view_active_index
     )
+
+
+# ——————————————————————————————————————————————————————————————————————
+# MARK: REGISTRATION
+# ——————————————————————————————————————————————————————————————————————
+
+
+register, unregister = bpy.utils.register_classes_factory((FileItemProperties, ExplorerProperties))

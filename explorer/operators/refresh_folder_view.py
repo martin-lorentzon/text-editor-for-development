@@ -1,10 +1,10 @@
-from bpy.types import Operator
+import bpy
 from ..helpers import disable_on_empty_folder_path, require_valid_open_folder, refresh_folder_view
 
 
 @disable_on_empty_folder_path
 @require_valid_open_folder
-class EXPLORER_OT_refresh_folder_view(Operator):
+class EXPLORER_OT_refresh_folder_view(bpy.types.Operator):
     bl_idname = "wm.explorer_refresh_folder_view"
     bl_label = "Refresh Open Folder"
     bl_description = "Update the displayed contents of the folder view"
@@ -13,3 +13,11 @@ class EXPLORER_OT_refresh_folder_view(Operator):
     def execute(self, context):
         refresh_folder_view()
         return {"FINISHED"}
+
+
+# ——————————————————————————————————————————————————————————————————————
+# MARK: REGISTRATION
+# ——————————————————————————————————————————————————————————————————————
+
+
+register, unregister = bpy.utils.register_classes_factory((EXPLORER_OT_refresh_folder_view,))

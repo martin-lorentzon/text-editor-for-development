@@ -1,8 +1,8 @@
 import bpy
-from .constants import EXTENSION_TO_ICON
-from .functions import text_at_file_path
 from bpy.types import UILayout
 from pathlib import Path
+from .constants import EXTENSION_TO_ICON
+from .. import __package__ as base_package
 
 
 class EXPLORER_UL_folder_view_list(bpy.types.UIList):
@@ -25,7 +25,7 @@ class EXPLORER_UL_folder_view_list(bpy.types.UIList):
 
         is_folder = item.is_dir
         file_type = item.file_type
-        
+
         icon = EXTENSION_TO_ICON.get(file_type, "FILE")
 
         text = item.text_ref
@@ -91,10 +91,11 @@ def template_explorer(layout: UILayout, context: bpy.types.Context):
     row.operator("wm.explorer_open_folder", text=folder_text)
     row.operator("wm.explorer_create_new_file", text="", icon="FILE_NEW")
     row.operator("wm.explorer_create_new_folder", text="", icon="NEWFOLDER")
-    row.operator_context = "INVOKE_DEFAULT"  # TODO: Why did I do this? Neither operators below use invoke methods X.X
+    # TODO: Why did I do this? Neither operators below use invoke methods X.X
+    row.operator_context = "INVOKE_DEFAULT"
     row.operator("wm.explorer_refresh_folder_view", text="", icon="FILE_REFRESH")
     row.operator("wm.explorer_collapse_folders", text="",
-                    icon="AREA_JOIN_LEFT" if bpy.app.version >= (4, 3, 0) else "AREA_JOIN")
+                 icon="AREA_JOIN_LEFT" if bpy.app.version >= (4, 3, 0) else "AREA_JOIN")
     if panel:
         panel.template_list(
             "EXPLORER_UL_folder_view_list",
@@ -108,9 +109,25 @@ class EXPLORER_PT_explorer_panel(bpy.types.Panel):
     bl_label = "Explorer"
     bl_space_type = "TEXT_EDITOR"
     bl_region_type = "UI"
-    bl_category = "Dev"
+    addon_prefs = bpy.context.preferences.addons[base_package].preferences
+    bl_category = "Explorer"
 
     def draw(self, context):
         layout = self.layout
 
         template_explorer(layout, context)
+
+
+# ——————————————————————————————————————————————————————————————————————
+# MARK: REGISTRATION
+# ——————————————————————————————————————————————————————————————————————
+
+
+basic_register, unregister = bpy.utils.register_classes_factory(
+    (EXPLORER_UL_folder_view_list, EXPLORER_PT_explorer_panel))
+
+
+def register():
+    addon_prefs = bpy.context.preferences.addons[base_package].preferences
+    EXPLORER_PT_explorer_panel.bl_category = addon_prefs.explorer_category
+    basic_register()
