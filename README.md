@@ -1,4 +1,6 @@
-![Featured Image](https://github.com/martin-lorentzon/text-editor-for-development/blob/main/images/featured_image_badge.png?raw=true)
+<p align="center">
+<img width="640" src="https://github.com/user-attachments/assets/6b91ef35-7185-43d8-92b9-445a421ff153" />
+</p>
 
 # Text editor for Development (Blender Add-on)
 > *Text editor enhancements for add-on development*
